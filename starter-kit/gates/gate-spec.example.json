@@ -1,0 +1,15 @@
+{
+  "_comment": "This is the WITHHELD schema. It lives where the generating agent's context never loads it. The agent is told only to submit an evidence file plus artifacts; it never sees these criteria.",
+  "required": [
+    {
+      "field": "test_output",
+      "type": "artifact",
+      "must_contain": "test_no_retry_on_4xx"
+    },
+    {
+      "field": "max_retries",
+      "type": "integer",
+      "max": 10
+    }
+  ]
+}

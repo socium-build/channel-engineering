@@ -1,0 +1,8 @@
+============================= test session starts ==============================
+collected 14 items
+
+tests/test_upload_client.py ............                                  [ 85%]
+tests/test_retry_policy.py::test_backoff_is_exponential PASSED            [ 92%]
+tests/test_retry_policy.py::test_no_retry_on_4xx PASSED                   [100%]
+
+============================== 14 passed in 0.42s ==============================

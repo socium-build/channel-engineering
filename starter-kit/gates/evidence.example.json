@@ -1,0 +1,5 @@
+{
+  "_comment": "This is what the generating agent submits: a pointer to proof artifacts plus claimed values. It cannot fake the artifact's existence or content.",
+  "test_output": "artifacts/test.log",
+  "max_retries": 3
+}
