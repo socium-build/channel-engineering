@@ -12,4 +12,4 @@ owning the loop end to end.
 ## License
 
 This paper is licensed **CC-BY-4.0** (same as the guide's prose). Share and adapt with
-attribution: *Engineering the Channel* by Joshua Paul / Socium, LLC.
+attribution: *Engineering the Channel* by Josh Paul / Socium, LLC.

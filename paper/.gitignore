@@ -1,0 +1,10 @@
+# LaTeX build artifacts — the canonical PDF is committed at ../docs/
+build/
+*.pdf
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk

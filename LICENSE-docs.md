@@ -10,7 +10,7 @@ You are free to **share** (copy and redistribute) and **adapt** (remix, transfor
 upon) this material for any purpose, including commercially, provided you give appropriate
 **attribution**.
 
-**Attribution:** *Channel Engineering: A Field Guide* by Joshua Paul / Socium, LLC.
+**Attribution:** *Channel Engineering: A Field Guide* by Josh Paul / Socium, LLC.
 
 Full legal text: <https://creativecommons.org/licenses/by/4.0/legalcode>
 Human-readable summary: <https://creativecommons.org/licenses/by/4.0/>
