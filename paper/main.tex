@@ -83,6 +83,7 @@
 \setlength{\parskip}{7pt}
 \setlength{\parindent}{0pt}
 \microtypesetup{tracking=true}
+\interfootnotelinepenalty=10000  % keep a footnote whole rather than split it across a page break
 
 % ── Caption style ──────────────────────────────────────────
 \captionsetup{
@@ -275,8 +276,9 @@ The industry has converged on \emph{context engineering}---curating the tokens a
 sees. Channel engineering goes further. Weaver's analysis separates the technical problem
 of moving symbols (the context window as medium, subject to the U-shaped attention curve
 and context rot) from the semantic problem of conveying intended meaning and the
-effectiveness problem of producing the intended outcome. Reliability is lost at the semantic
-and effectiveness levels, which token curation alone cannot reach. We argue the difference is
+effectiveness problem of producing the intended outcome. The semantic and effectiveness
+levels---where reliability is lost---are the levels token curation alone cannot reach, and
+the levels the field's evidence has not yet measured directly. We argue the difference is
 ownership: you cannot engineer a channel you do not own. Effective channel engineering
 requires control of the whole agent loop---assembly, budget, and retention---together with
 deterministic, extractive memory, non-gameable validation gates, mode-dependent context
@@ -293,7 +295,12 @@ discipline economically viable for mainstream software development for the first
 The paper also introduces the \textbf{Socium model}, an application of channel engineering
 to human-AI collaboration, in which the partnership is treated as a distributed system, the
 context window is treated as a communication channel, and the accumulated decisions and
-artifacts of the work are treated as a shared corpus of durable intelligence. We conclude with a set of practical
+artifacts of the work are treated as a shared corpus of durable intelligence.
+This paper is a synthesis: it assembles converging work into a connected argument, takes
+positions the field will test, and names a gap---the semantic and effectiveness
+levels---that the field's current evidence does not yet measure directly; the discipline it
+argues for is old, and what is new is the affordability argument and the naming of the gap.
+We conclude with a set of practical
 principles for channel engineering and a call for the field to treat LLM reliability as
 an engineering problem to be solved alongside model improvement, not downstream of it.
 
@@ -308,7 +315,9 @@ but unreliable in production. The code would work for one case and fail for anot
 documentation would be accurate in one section and hallucinatory in the next. The test
 suite would pass today and fail tomorrow on the same codebase.
 
-The field's consensus response has been to wait for better models. Yet the evidence of
+The field's consensus response has been to wait for better models.\footnote{Rarely
+advanced as an explicit thesis, this is the implicit premise of capability-first investment
+and scaling-optimist roadmaps; the evidence assembled below weighs against it.} Yet the evidence of
 the last two years cuts against that hope. In a 2026 survey of two hundred engineering
 leaders, 82\% reported at least one major production failure caused by AI-generated code
 in the preceding six
@@ -328,14 +337,14 @@ in the accuracy of AI output fell from 40\% to 29\%, with the single largest
 frustration---cited by two-thirds of developers---being output that is `almost right,
 but not quite.'\footnote{Stack Overflow, \href{https://survey.stackoverflow.co/2025/ai}{\textit{2025 Developer Survey}}.}
 Across this period the models improved markedly; the structural problem did not move with
-them.
+them.\footnote{S.~Rabanser, S.~Kapoor, A.~Narayanan, et al., \href{https://arxiv.org/abs/2602.16666}{\textit{Towards a Science of AI Agent Reliability}}, arXiv:2602.16666, 2026: evaluating 15 models across two complementary agent benchmarks, the authors find that recent capability gains have produced only small improvements in reliability---a limitation that appears across providers.}
 
 This is not evidence that capability is irrelevant. Better models do produce better
 output, and a sufficiently capable model would paper over many channel defects.
 The claim of this paper is narrower, and harder to dismiss: capability and the channel
-are \emph{complements}, and the field has poured almost all of its investment into the
-former while leaving the latter under-engineered. Reliability lives disproportionately
-in the half no one is building.
+are \emph{complements}, and the field has poured almost all of its visible investment into
+the former while leaving the latter under-engineered. If this is right, reliability lives
+disproportionately in the half no one is building.
 
 The reliability problem in LLM-assisted development mirrors, almost exactly, the
 reliability problem that motivated the development of software engineering as a discipline
@@ -353,8 +362,8 @@ testing, version control, code review---were not solutions to a capability probl
 engineers of 1968 were not insufficiently skilled. They were operating without the
 engineering discipline that transforms individual skill into reliable systems.
 
-\pullquote{The LLM reliability problem is not a model problem. It is the same
-engineering problem we have always had---now wearing a new face.}
+\pullquote{The LLM reliability problem is not \emph{only} a model problem. It is, in
+large part, the same engineering problem we have always had---now wearing a new face.}
 
 This paper argues that LLM-assisted development is in the same position as
 pre-discipline software development: engineers with significant capability operating
@@ -390,7 +399,8 @@ intended meaning? \textbf{Level C}, the \emph{effectiveness} problem: how well d
 received meaning produce the intended conduct? Channel engineering is the discipline of
 engineering all three levels of the human-AI channel---not merely the first. The
 mainstream effort to curate what enters the context window is sophisticated work at Level
-A. Reliability is lost at B and C.
+A. If reliability is lost at B and C---as we argue below---then token curation alone
+cannot reach it.
 
 \subsection{The Context Window Is the Medium, Not the Channel}
 
@@ -414,8 +424,8 @@ formalization in \href{https://arxiv.org/abs/2605.09121}{`A Communication-Theore
 Framework for LLM Agents'}, arXiv:2605.09121, 2026.} That work concerns the medium and the
 model; the channel this paper engineers is the managed interaction \emph{around}
 them---encoding, shared code, feedback, and retention---which is precisely where Weaver's
-semantic and effectiveness problems live. A separate and more recent formal literature has
-begun to corroborate that move directly: modeling the audience and context as a channel
+semantic and effectiveness problems live. A separate and more recent formal literature is
+beginning to formalize the same intuition: modeling the audience and context as a channel
 with a finite \emph{capacity for meaning}, it finds that even perfectly engineered prompts
 cannot exceed it, and that vocabulary mismatch imposes an irreducible fidelity limit even
 over a noiseless carrier---an independent, mathematical restatement of the claim that
@@ -428,7 +438,14 @@ from vocabulary mismatch that persists even over a noiseless carrier.}
 \subsection{The Medium Is Lossy in a Specific, Now-Quantified Way}
 
 LLM context windows have grown dramatically---from 2,048 tokens in the original GPT-3 to
-hundreds of thousands of tokens in current models. This growth has led to the assumption
+one million tokens as standard across today's frontier models, and as many as ten million
+in some.\footnote{As of 2026, one-million-token windows are standard across the frontier
+(current Claude, GPT, and Gemini models---Gemini's is exactly 1,048,576); Meta's Llama~4
+Scout advertises the largest at ten million tokens, though no published benchmark shows
+quality holding near that length. Epoch~AI finds the longest context windows have grown
+roughly thirtyfold per year since 2023
+(\href{https://epoch.ai/data-insights/context-windows}{epoch.ai/data-insights/context-windows}).}
+This growth has led to the assumption
 that the channel problem is being solved by scale. It is not. The medium is lossy in a
 specific, measured way. Liu and colleagues showed that a model's ability to use a piece
 of information depends on \emph{where} in the context it sits: accuracy is high at the
@@ -447,7 +464,13 @@ attention toward earlier positions structurally rather than as a learned artifac
 follow-on result \href{https://arxiv.org/abs/2603.10123}{`Lost in the Middle at Birth: An
 Exact Theory of Transformer Position Bias'}, arXiv:2603.10123, 2026, shows the full
 U-shape is present at random initialization, with or without RoPE, and that standard
-pretraining does not remove it.} The lesson inverts the bigger-window optimism: the medium
+pretraining does not remove it.} Inference-time calibration can recover part of this loss
+for some tasks, but not reliably or in full.\footnote{C.-Y.~Hsieh et al.,
+\href{https://arxiv.org/abs/2406.16008}{`Found in the Middle: Calibrating Positional
+Attention Bias Improves Long Context Utilization'}, Findings of ACL 2024
+(arXiv:2406.16008): a training-free method that subtracts the model's positional bias from
+its attention weights recovers up to fifteen points of long-context RAG accuracy---a
+partial, task-dependent remedy, not a fix.} The lesson inverts the bigger-window optimism: the medium
 does not become reliable by growing. It must be engineered.
 
 This is not a failure of the models. It is a property of the medium, as packet loss is a
@@ -538,8 +561,8 @@ maintaining an audit trail that makes the history of decisions navigable and rec
 
 If the lossy medium is one structural source of unreliability, the process that consumes
 it is the other. The context window loses information; the model traversing it is, in a
-precise and useful sense, short-sighted. The most accurate vocabulary for this second
-failure does not come from machine learning. It comes from clinical neuropsychology.
+precise and useful sense, short-sighted. A useful vocabulary for this second failure comes
+not from machine learning but from clinical neuropsychology.
 
 In 1997, the clinical psychologist Russell Barkley reframed ADHD. The disorder, he argued,
 is not fundamentally a deficit of attention; it is a deficit of \emph{behavioral
@@ -557,7 +580,8 @@ you engineer the environment to supply the functions the person cannot reliably 
 internally.
 
 Observed across long-horizon tasks, LLM behavior fits the pattern with uncomfortable
-precision, and the parallel is structural rather than poetic. \textbf{Working memory:}
+precision, and the parallel is functional, not decorative---the behaviors match, even if
+the mechanisms differ. \textbf{Working memory:}
 models drift from their original requirements over a long task, repeating work or solving
 a subtly different problem than the one specified---the goal state degrades just as the
 medium loses its early tokens. \textbf{Inhibition:} asked whether a test passes, the
@@ -633,26 +657,38 @@ Anthropic's included---is to have the model \emph{compact} the history into a ge
 summary.\footnote{Anthropic, \href{https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents}{`Effective
 Context Engineering for AI Agents'}, 2025, presents LLM-based compaction of conversation
 history as a primary long-horizon strategy.} We take the opposite position. A generative
-step in the memory path can hallucinate, and its errors compound into every later package.
-Retention should be \emph{extractive}: it may omit, but it must not
+step in the memory path can hallucinate, and its errors compound into every later
+package. Retention should be \emph{extractive}: it may omit, but it must not
 invent---deterministic, replayable, auditable. The asymmetry the context-engineering
 survey identifies---models comprehend rich context far better than they generate
-it---argues against placing generation in the load-bearing memory path; controlled
-results in which machine-generated context files \emph{reduced} task success point the
-same direction.\footnote{An ETH Zurich evaluation across four coding agents and two
+it---argues against placing generation in the load-bearing memory path; an ETH Zurich
+evaluation in which machine-generated repository context files \emph{reduced} task
+success points the same way.\footnote{An ETH Zurich evaluation across four coding agents and two
 benchmarks found that LLM-generated repository context files reduced task-success rates
 relative to providing no context file while raising inference cost by over 20\%;
 developer-written files produced only marginal gains.
 \href{https://arxiv.org/abs/2602.11988}{`Evaluating AGENTS.md: Are Repository-Level
-Context Files Helpful for Coding Agents?'}, arXiv:2602.11988, 2026.}
+Context Files Helpful for Coding Agents?'}, arXiv:2602.11988, 2026. The study measures
+generated context files, not generative compaction of conversation history; the two are
+related but distinct mechanisms.} The position is argued, not yet tested.
 
 \subsection*{3.~Make validation gates non-gameable}
 
 A gate that advertises its acceptance criteria to the generator it constrains invites the
-model to satisfy the letter rather than do the work---Goodhart's law restated for AI. The
+model to satisfy the letter rather than do the work---Goodhart's law restated for
+AI.\footnote{C.~A.~E.~Goodhart, `Problems of Monetary Management: The U.K.\ Experience,'
+\textit{Papers in Monetary Economics}, Reserve Bank of Australia, 1975, originates the law;
+the now-standard phrasing---``when a measure becomes a target, it ceases to be a good
+measure''---is M.~Strathern, \href{https://doi.org/10.1017/S1062798700002660}{`Improving
+Ratings: Audit in the British University System'}, \textit{European Review} 5(3), 1997.} The
 remedy is to validate \emph{submitted} evidence after the fact rather than publish the
 test in advance. The most-cited developer frustration of 2025---output that is ``almost
-right, but not quite''---is this failure at population scale.
+right, but not quite''---is this failure at population scale.\footnote{F.~Liu et al.,
+\href{https://arxiv.org/abs/2404.00971}{`Beyond Functional Correctness: Exploring
+Hallucinations in LLM-Generated Code'}, IEEE TSE 2026 (arXiv:2404.00971), build a taxonomy
+of code hallucinations whose categories include conflicts with the task's requirements and
+with the surrounding project context: ``almost right'' is, concretely, fluent and plausible
+code that diverges from intent or repository reality.}
 
 \subsection*{4.~Assemble by mode}
 
@@ -724,7 +760,7 @@ aviation crew resource management, nuclear plant operations, and other high-stak
 delegation contexts. For the general doctrine see
 \href{https://en.wikipedia.org/wiki/Mission_command}{en.wikipedia.org/wiki/Mission\_command}.}
 
-The parallel to channel engineering is not decorative. Commander accountability is
+The parallel to channel engineering is structural, not ornamental. Commander accountability is
 legitimate only to the degree the commander can comprehend and refuse what they authorize;
 a checkpoint trivial enough to rubber-stamp produces accountability in name only. The
 same constraint is load-bearing in human-AI systems: amplifying past the steward's
@@ -793,7 +829,7 @@ checking, not the drafting, that the gates of channel engineering make affordabl
 trust.
 
 \pullquote{LLMs do not make engineering discipline unnecessary.
-They make it affordable---for the first time, for everyone.}
+They make it affordable---for the first time, for many.}
 
 
 % ============================================================
@@ -819,11 +855,26 @@ distribution.
 A single generation that is 95\% reliable sounds excellent. But agentic software work is
 not a single generation; it is a chain---read, design, implement, test, debug,
 ship---of many dependent steps, each conditioned on the last. Reliability across a chain
-is approximately the product of the per-step reliabilities. At 95\% per step, a ten-step
+is approximately the product of the per-step reliabilities. At an illustrative 95\% per step, a ten-step
 task finishes correctly about 60\% of the time; a hundred-step task, well under 1\%:
-$0.95^{100}\approx 0.006$. This treats the steps as independent and the errors as
-uncorrected---a worst case, and deliberately so: the entire purpose of re-grounding and
-validation gates is to break that independence by catching errors before they propagate.
+$0.95^{100}\approx 0.006$.\footnote{The per-step figure is illustrative; the compounding it
+models is measured. METR finds task-success rates fall steeply with task length---the
+horizon at which frontier models succeed 80\% of the time is roughly five times shorter
+than their 50\% horizon, the macroscopic signature of errors compounding across steps
+(\href{https://arxiv.org/abs/2503.14499}{`Measuring AI Ability to Complete Long Tasks'},
+arXiv:2503.14499, 2025). Sinha et al.\ trace the mechanism: single-step accuracy compounds
+over a horizon, so marginal per-step gains translate into exponentially longer achievable
+tasks---and a model highly accurate in one step still fails across many. They further find
+per-step accuracy itself \emph{degrades} as steps accumulate, the model conditioning on its
+own earlier mistakes---a `self-conditioning' effect
+(\href{https://arxiv.org/abs/2509.09677}{`The Illusion of Diminishing Returns: Measuring
+Long Horizon Execution in LLMs'}, ICLR 2026, arXiv:2509.09677).} This treats the steps as independent---the \emph{charitable} assumption. Real errors
+correlate: a mistake left in the window conditions every step that follows, so per-step
+accuracy degrades as the chain lengthens rather than holding flat. The independent-step
+curve therefore understates the trouble, not overstates it; the true uncorrected decay is
+steeper still. Which is exactly why the remedy cannot be a better average step---it must
+interrupt the propagation: re-ground in project truth so the model stops conditioning on
+its own residue, and gate each step so an error is caught before it poisons the next.
 The arithmetic is unforgiving, and it explains why mean
 accuracy on isolated benchmarks so badly overpredicts reliability in production---and why
 the METR finding, capable models making experienced developers \emph{slower} on real,
@@ -1079,68 +1130,6 @@ produces output within those constraints. The validation phase compares the outp
 the specification and catches channel failures. The corpus update phase incorporates the
 validated output---and the decisions that produced it---into the accumulated corpus.
 
-\subsection{The Cycle in Practice}
-
-These four phases are not hypothetical. The author has implemented them in a working
-system---built rapidly as a testbed for these principles, and now the foundation for
-ongoing work. Tracing a single task through that system makes the cycle concrete.
-
-A feature does not begin with a prompt. It begins with a \emph{specification}: a structured
-set of artifacts---business requirements, technical design, and a task breakdown in which
-every task carries explicit, checkable acceptance criteria. The specification is authored
-in its own gated workflow, and is not advanced to implementation until a human approves it.
-This is the moment the output distribution is narrowed---before a line of code is generated.
-
-Implementation then proceeds one task at a time. Before generating, the agent retrieves the
-project's own standards for the work at hand---re-grounding in project truth rather than
-trusting the residue left in the window. It writes the code and its tests, then submits the
-result to a validation gate. The gate is non-gameable by construction: the evidence schema
-it checks against is \emph{withheld from the generating agent}, so the model cannot optimize
-to the rubric. It can only submit proof artifacts---test output, file listings, command
-results---which the gate validates after the fact, down to their content. A failed gate
-halts advancement; an autonomous run cannot self-certify its way past it.
-
-Only validated work updates the corpus. The acceptance criteria are marked complete, an
-evidence record is appended, and the decision joins the durable corpus of specifications,
-standards, and audit trails. When a later session---a fresh, stateless model with no memory
-of this work---meets a related problem, it retrieves that decision through the same channel.
-Each validated task leaves the next one better grounded than the last: the loop is built to
-compound reliability rather than erode it.
-
-\begin{mdframed}[
-  linewidth=0.6pt, linecolor=lightgray, backgroundcolor=white,
-  innertopmargin=9pt, innerbottommargin=9pt,
-  innerleftmargin=12pt, innerrightmargin=12pt,
-  skipabove=12pt, skipbelow=12pt]
-{\labelfont\fontsize{8}{10}\selectfont\color{indigo}A SINGLE TASK, TRACED}\par
-\vskip5pt
-{\fontsize{9.5}{13.5}\selectfont
-\textbf{Spec.}\; Task~3.2, ``add bounded retry to the upload client,'' carries one
-\emph{checkable} acceptance criterion---\emph{retries are bounded, backoff is exponential,
-and a test proves no retry on a 4xx response}. A human approves the spec before a line of
-code is generated.\par
-\vskip4pt
-\textbf{Gate (withheld).}\; The evidence schema the gate enforces is never shown to the
-generating agent:\par
-\vskip2pt
-\hspace*{10pt}\texttt{require test\_output : artifact}\par
-\hspace*{10pt}\texttt{assert  max\_retries <= 10}\par
-\hspace*{10pt}\texttt{assert  proof : no\_retry\_on\_4xx}\par
-\vskip2pt
-The agent cannot shape its work to a rubric it cannot read.\par
-\vskip4pt
-\textbf{Proof.}\; It submits artifacts, not assurances:\par
-\vskip2pt
-\hspace*{10pt}\texttt{test\_output: 14 passed, incl.\ test\_no\_retry\_on\_4xx}\par
-\vskip2pt
-The gate checks the artifact's \emph{content}; a bare ``done'' does not pass.\par
-\vskip4pt
-\textbf{Corpus.}\; On a pass, the decision \texttt{bounded-retry-policy} and its evidence
-record join the durable corpus---retrievable months later by a fresh, stateless session
-that never saw this task.
-}
-\end{mdframed}
-
 % Four-Layer stack above is manually labelled "Figure 3"; advance the float
 % counter so this auto-numbered figure becomes Figure 4 (partnership network).
 \setcounter{figure}{3}
@@ -1197,6 +1186,77 @@ that never saw this task.
   \label{fig:partnership}
 \end{figure}
 
+\subsection{The Cycle in Practice}
+
+These four phases are not hypothetical. The author is implementing them in a Rust daemon,
+informed by a prior Python/MCP prototype that exposed the failure modes---silent plan-item
+drops, permissive gate fallbacks, model self-attestation of approval---that the design
+corrects. The corrected mechanics are specified but not yet all operational; the
+prototype's defects are what they correct. Tracing a single task through the design makes
+the cycle concrete.
+
+A feature does not begin with a prompt. It begins with a \emph{specification}: a structured
+set of artifacts---business requirements, technical design, and a task breakdown in which
+every task carries explicit, checkable acceptance criteria. The specification is authored
+in its own gated workflow, and is not advanced to implementation until a human approves it.
+This is the moment the output distribution is narrowed---before a line of code is
+generated.\footnote{Q.~Ma et al., \href{https://arxiv.org/abs/2409.08775}{`What Should We
+Engineer in Prompts? Training Humans in Requirement-Driven LLM Use'}, ACM TOCHI 2025
+(arXiv:2409.08775): in a randomized controlled experiment, training novices to articulate
+explicit requirements outperformed conventional prompt-engineering training twenty points
+to one---a gap automatic prompt optimization did not close. Input quality lives in the
+requirements, not the phrasing.}
+
+Implementation then proceeds one task at a time. Before generating, the agent retrieves the
+project's own standards for the work at hand---re-grounding in project truth rather than
+trusting the residue left in the window. It writes the code and its tests, then submits the
+result to a validation gate. The gate is designed to be non-gameable by construction: the
+evidence schema it checks against is \emph{withheld from the generating agent}, so the
+model cannot optimize to the rubric. It can only submit proof artifacts---test output,
+file listings, command results---which the gate validates after the fact, down to their
+content. When implemented as specified, a failed gate halts advancement; an autonomous
+run cannot self-certify its way past it.
+
+Only validated work updates the corpus. The acceptance criteria are marked complete, an
+evidence record is appended, and the decision joins the durable corpus of specifications,
+standards, and audit trails. When a later session---a fresh, stateless model with no memory
+of this work---meets a related problem, it retrieves that decision through the same channel.
+Each validated task leaves the next one better grounded than the last: the loop is built to
+compound reliability rather than erode it.
+
+\begin{mdframed}[
+  linewidth=0.6pt, linecolor=lightgray, backgroundcolor=white,
+  innertopmargin=9pt, innerbottommargin=9pt,
+  innerleftmargin=12pt, innerrightmargin=12pt,
+  skipabove=12pt, skipbelow=12pt]
+{\labelfont\fontsize{8}{10}\selectfont\color{indigo}A SINGLE TASK, TRACED}\par
+\vskip5pt
+{\fontsize{9.5}{13.5}\selectfont
+\textbf{Spec.}\; Task~3.2, ``add bounded retry to the upload client,'' carries one
+\emph{checkable} acceptance criterion---\emph{retries are bounded, backoff is exponential,
+and a test proves no retry on a 4xx response}. A human approves the spec before a line of
+code is generated.\par
+\vskip4pt
+\textbf{Gate (withheld).}\; The evidence schema the gate enforces is never shown to the
+generating agent:\par
+\vskip2pt
+\hspace*{10pt}\texttt{require test\_output : artifact}\par
+\hspace*{10pt}\texttt{assert  max\_retries <= 10}\par
+\hspace*{10pt}\texttt{assert  proof : no\_retry\_on\_4xx}\par
+\vskip2pt
+The agent cannot shape its work to a rubric it cannot read.\par
+\vskip4pt
+\textbf{Proof.}\; It submits artifacts, not assurances:\par
+\vskip2pt
+\hspace*{10pt}\texttt{test\_output: 14 passed, incl.\ test\_no\_retry\_on\_4xx}\par
+\vskip2pt
+The gate checks the artifact's \emph{content}; a bare ``done'' does not pass.\par
+\vskip4pt
+\textbf{Corpus.}\; On a pass, the decision \texttt{bounded-retry-policy} and its evidence
+record join the durable corpus---retrievable months later by a fresh, stateless session
+that never saw this task.
+}
+\end{mdframed}
 
 % ============================================================
 %  SECTION 9
@@ -1336,11 +1396,11 @@ measurement of these commitments inside a system that owns the full loop.
 
 What remains particular to this account, then, is not the channel metaphor but three things
 the surrounding literature does not combine: the diagnosis of long-horizon failure as a
-deficit of \emph{executive function} rather than of capability or attention; the explicit,
-falsifiable preference for deterministic memory over generative compaction; and the
-reconstruction of LLM reliability not as a new field but as the next chapter of an
-engineering tradition that already knows how to make capable but inconsistent agents
-reliable.
+functional \emph{executive-function} deficit---behaviors that match, mechanisms that may
+not---rather than a deficit of capability or attention; the explicit, falsifiable
+preference for deterministic memory over generative compaction; and the reconstruction of
+LLM reliability not as a new field but as the next chapter of an engineering tradition
+that already knows how to make capable but inconsistent agents reliable.
 
 
 % ============================================================
@@ -1644,14 +1704,77 @@ Rome, Italy, 27--31 Oct.\ 1969}. Scientific Affairs Division, NATO, 1970.\\*
 \href{http://homepages.cs.ncl.ac.uk/brian.randell/NATO/nato1969.PDF}{homepages.cs.ncl.ac.uk/brian.randell/NATO/nato1969.PDF}}
 
 
+\noindent\textbf{43.}\enspace S.~Rabanser, S.~Kapoor, P.~Kirgis, K.~Liu, S.~Utpala, and
+A.~Narayanan---\textit{Towards a Science of AI Agent Reliability}. arXiv:2602.16666
+(Princeton University), 2026. (Decomposes agent reliability into consistency, robustness,
+predictability, and safety across twelve metrics; evaluating 15 models on two benchmarks,
+finds recent capability gains produced only small reliability improvements industry-wide.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://arxiv.org/abs/2602.16666}{arxiv.org/abs/2602.16666}}
+
+
+\noindent\textbf{44.}\enspace C.~A.~E.~Goodhart---`Problems of Monetary Management: The
+U.K.\ Experience.' \textit{Papers in Monetary Economics}, Reserve Bank of Australia, 1975
+(origin of Goodhart's law); the now-standard formulation is M.~Strathern---`Improving
+Ratings: Audit in the British University System.' \textit{European Review} 5(3):305--321,
+1997 (``when a measure becomes a target, it ceases to be a good measure'').\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://doi.org/10.1017/S1062798700002660}{doi.org/10.1017/S1062798700002660}}
+
+
+\noindent\textbf{45.}\enspace Q.~Ma, W.~Peng, C.~Yang, H.~Shen, K.~Koedinger, and
+T.~Wu---`What Should We Engineer in Prompts? Training Humans in Requirement-Driven LLM
+Use.' \textit{ACM Transactions on Computer-Human Interaction}, 2025 (arXiv:2409.08775).
+(Randomized controlled experiment: requirement-articulation training beat conventional
+prompt-engineering training 20\% to 1\%, a gap automatic prompt optimization did not
+close.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://arxiv.org/abs/2409.08775}{arxiv.org/abs/2409.08775}}
+
+
+\noindent\textbf{46.}\enspace F.~Liu, Y.~Liu, L.~Shi, Z.~Yang, L.~Zhang, X.~Lian, Z.~Li,
+and Y.~Ma---`Beyond Functional Correctness: Exploring Hallucinations in LLM-Generated
+Code.' \textit{IEEE Transactions on Software Engineering}, 2026 (arXiv:2404.00971).
+(Taxonomy of code hallucinations across three primary and twelve sub-categories, including
+conflicts with task requirements and with project context.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://arxiv.org/abs/2404.00971}{arxiv.org/abs/2404.00971}}
+
+
+\noindent\textbf{47.}\enspace C.-Y.~Hsieh, Y.-S.~Chuang, C.-L.~Li, et al.---`Found in the
+Middle: Calibrating Positional Attention Bias Improves Long Context Utilization.' Findings
+of ACL 2024 (arXiv:2406.16008). (Training-free inference-time calibration subtracting
+positional bias from attention weights, recovering up to fifteen points of long-context
+RAG accuracy---a partial, task-dependent remedy.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://arxiv.org/abs/2406.16008}{arxiv.org/abs/2406.16008}}
+
+
+\noindent\textbf{48.}\enspace T.~Kwa et al.\ (METR)---`Measuring AI Ability to Complete
+Long Tasks.' arXiv:2503.14499, 2025. (Defines the 50\%-task-completion time horizon;
+task-success rates fall steeply with task length, and the 80\% horizon is roughly five
+times shorter than the 50\% horizon---evidence of errors compounding across steps.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://arxiv.org/abs/2503.14499}{arxiv.org/abs/2503.14499}}
+
+
+\noindent\textbf{49.}\enspace A.~Sinha, A.~Arun, S.~Goel, S.~Staab, and J.~Geiping---`The
+Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs.' ICLR 2026
+(arXiv:2509.09677). (Single-step accuracy compounds over a horizon---marginal per-step
+gains yield exponentially longer achievable tasks---while per-step accuracy itself degrades
+as steps accumulate, via a self-conditioning effect.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://arxiv.org/abs/2509.09677}{arxiv.org/abs/2509.09677}}
+
+
 \normalsize
 \interlinepenalty=0\relax
 \section*{About the Author}
 
 \noindent Josh Paul is the founder of Socium. Over nearly two decades he has engineered
 reliability into large-scale distributed systems---infrastructure automation, Kubernetes
-platform engineering, observability, and network security---at AWS, Nutanix, Okta, The
-Trade Desk, and Amplitude, among others. He began his career in the United States Air
+platform engineering, observability, and network security---at AWS, Nutanix, Okta, and
+Amplitude, among others. He began his career in the United States Air
 Force as a Russian cryptologic linguist and digital network intelligence analyst, and
 taught collection targeting systems and strategies as adjunct faculty at the National
 Cryptologic School---communication channels under adversarial conditions were the work,

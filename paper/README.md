@@ -71,7 +71,7 @@ runs two passes for cross-references, and then syncs the resulting PDF to:
   repo is checked out as a sibling under `…/socium-build/website` (otherwise it
   skips that copy).
 
-Output: 29 pages.
+Output: 30 pages.
 
 ### Build (manual)
 

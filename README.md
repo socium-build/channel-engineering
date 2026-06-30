@@ -308,7 +308,8 @@ every future retrieval; extraction can only omit, never invent.
 wrote. If it can, it's summarizing, not retaining.
 
 **Anti-pattern.** Asking the model to "compact the history" into a generated summary that
-becomes load-bearing memory — a measured reliability regression, not a convenience.
+becomes load-bearing memory — an unforced reliability risk the evidence runs against, not a
+convenience.
 
 **Minimum viable today.** When you trim memory, cut by selecting and keeping real excerpts
 (with source links), not by generating a paraphrase.
@@ -355,10 +356,11 @@ bounded-retry policy) across the whole loop:
 
 This guide is the method. Doing it by hand is *laborious* — non-gameable gates, deterministic
 retention, and re-grounding at every step are real work to assemble and keep honest.
-[Socium](https://socium.build) is the substrate that runs this loop for you, end to end, so the
-gates are non-gameable and the corpus is deterministic by default instead of by discipline.
+[Socium](https://socium.build) is the substrate being built to run this loop for you, end to
+end — so the gates are non-gameable and the corpus is deterministic by default instead of by
+discipline.
 
-This guide stands on its own. Socium is the easy way to live by it.
+This guide stands on its own. Socium aims to be the easy way to live by it.
 
 ---
 
