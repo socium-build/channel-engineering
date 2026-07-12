@@ -1,7 +1,7 @@
 # Engineering the Channel — LaTeX Source
 
 **"Engineering the Channel: Restoring Software Engineering Discipline in the Age of LLMs"**
-Josh Paul · Socium · June 2026
+Josh Paul · Socium · July 2026
 
 ---
 
@@ -71,7 +71,7 @@ runs two passes for cross-references, and then syncs the resulting PDF to:
   repo is checked out as a sibling under `…/socium-build/website` (otherwise it
   skips that copy).
 
-Output: 30 pages.
+Output: 31 pages.
 
 ### Build (manual)
 
@@ -105,6 +105,10 @@ a relative `Path = fonts/`, so the source is self-contained — no system font
 installation is required on any platform. Use `./build.sh` (which compiles from
 this directory automatically) and the relative paths always resolve; if you run
 `xelatex` by hand, do so from this `paper/` directory for the same reason.
+
+Both typefaces are redistributed under the SIL Open Font License 1.1; the
+upstream license texts are included as `fonts/LICENSE-Inter.txt` and
+`fonts/LICENSE-SourceSerif.md`.
 
 ---
 

@@ -160,7 +160,7 @@
 \renewcommand{\footrule}{{\color{lightgray}\hrule width\headwidth height 0.4pt}}
 
 \fancyfoot[L]{\labelfont\fontsize{7.5}{9}\selectfont\color{muted}%
-  Engineering the Channel \textperiodcentered\ Socium White Paper \textperiodcentered\ June 2026}
+  Engineering the Channel \textperiodcentered\ Socium White Paper \textperiodcentered\ July 2026}
 \fancyfoot[R]{\labelfont\fontsize{7.5}{9}\selectfont\color{muted}\thepage}
 
 % Suppress header on page 1 (cover)
@@ -170,14 +170,14 @@
   \renewcommand{\footrulewidth}{0.4pt}
   \renewcommand{\footrule}{{\color{lightgray}\hrule width\headwidth height 0.4pt}}
   \fancyfoot[L]{\labelfont\fontsize{7.5}{9}\selectfont\color{muted}%
-    Engineering the Channel \textperiodcentered\ Socium White Paper \textperiodcentered\ June 2026}
+    Engineering the Channel \textperiodcentered\ Socium White Paper \textperiodcentered\ July 2026}
   \fancyfoot[R]{\labelfont\fontsize{7.5}{9}\selectfont\color{muted}\thepage}
 }
 
 \fancyhead[L]{}
 \fancyhead[R]{\labelfont\fontsize{7.5}{9}\selectfont\color{muted}%
   \MakeUppercase{Engineering the Channel} \textperiodcentered\
-  \MakeUppercase{Socium White Paper} \textperiodcentered\ \MakeUppercase{June 2026}}
+  \MakeUppercase{Socium White Paper} \textperiodcentered\ \MakeUppercase{July 2026}}
 
 % ── Hyperlinks ─────────────────────────────────────────────
 \hypersetup{
@@ -249,7 +249,7 @@ Restoring Software Engineering Discipline in the Age of LLMs}
 
 % Author / date block
 {\labelfont\fontsize{10}{14}\selectfont\color{nearblack}Josh Paul}\\[3pt]
-{\labelfont\fontsize{10}{14}\selectfont\color{muted}Socium \textperiodcentered\ June 2026}
+{\labelfont\fontsize{10}{14}\selectfont\color{muted}Socium \textperiodcentered\ July 2026}
 
 \newpage
 
@@ -298,8 +298,7 @@ context window is treated as a communication channel, and the accumulated decisi
 artifacts of the work are treated as a shared corpus of durable intelligence.
 This paper is a synthesis: it assembles converging work into a connected argument, takes
 positions the field will test, and names a gap, the semantic and effectiveness levels,
-that the field's current evidence does not yet measure directly. The discipline it argues
-for is old; what is new is the affordability argument and the naming of the gap.
+that the field's current evidence does not yet measure directly.
 We conclude with a set of practical
 principles for channel engineering and a call for the field to treat LLM reliability as
 an engineering problem to be solved alongside model improvement, not downstream of it.
@@ -624,8 +623,10 @@ thesis) is no longer contrarian; it is the emerging consensus. Anthropic describ
 engineering,''\footnote{Anthropic, \href{https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents}{`Effective Context Engineering for AI Agents'}, 2025.}
 a 2025 survey systematizing the area drew on more than fourteen hundred
 papers,\footnote{L. Mei et al., \href{https://arxiv.org/abs/2507.13334}{`A Survey of Context Engineering for Large Language Models'}, arXiv:2507.13334, 2025.}
-and the practitioner consensus now holds that most agent failures stem from poor context
-engineering rather than weak model capability. We welcome the convergence. But context
+and practitioners now state the diagnosis flatly: most agent failures are not model
+failures but context failures.\footnote{P.~Schmid,
+\href{https://www.philschmid.de/context-engineering}{`The New Skill in AI is Not
+Prompting, It's Context Engineering'}, philschmid.de, June 2025.} We welcome the convergence. But context
 engineering, as practiced, is largely the discipline of curating the tokens that enter a
 window: Weaver's Level~A, and often from inside a loop one does not own. Reliability at
 the tail demands more than good packing. Five commitments mark where channel engineering
@@ -646,6 +647,11 @@ The conclusion is not ours alone: the practitioner `12-factor agents' framework 
 it independently, making \emph{own your context window} and \emph{own your control flow}
 two of its load-bearing factors.\footnote{D.~Horthy / HumanLayer,
 \href{https://github.com/humanlayer/12-factor-agents}{`12-Factor Agents'}, 2025.}
+From the research side, Weng's survey of \emph{harness engineering} names the same layer
+and treats it as no less decisive than the model itself; Section~12 takes up the
+relationship.\footnote{L.~Weng,
+\href{https://lilianweng.github.io/posts/2026-07-04-harness/}{`Harness Engineering for
+Self-Improvement'}, Lil'Log, July 2026.}
 Architecture is what separates acceleration from instability.
 
 \subsection*{2.~Keep durable memory deterministic}
@@ -721,7 +727,7 @@ reliable in safety-critical contexts.
 Bertrand Meyer's Design by
 Contract, formalized in the Eiffel language and documented in \textit{Object-Oriented
 Software
-Construction},\footnote{\href{https://bertrandmeyer.com/wp-content/uploads/OOSC2.pdf}{https://bertrandmeyer.com/wp-content/uploads/OOSC2.pdf}} was
+Construction},\footnote{\href{https://bertrandmeyer.com/OOSC2/}{https://bertrandmeyer.com/OOSC2/}} was
 an answer to the same problem at the level of individual modules: how do you make the
 behavior of a component reliable and verifiable independently of the competence of its
 caller? The answer was to make the contract explicit---to engineer the interface between
@@ -1378,6 +1384,23 @@ matters because a low-variance step is still one step in a compounding chain: dr
 per-step error down helps, but it does not, by itself, arrest the geometric decay of
 Section~7. Re-grounding addresses what better sampling cannot.
 
+As this paper was being finalized, the same layer was named from the capability
+direction. Weng's \emph{harness engineering} describes the system surrounding a base
+model that orchestrates how it plans, acts, manages context, stores artifacts, and
+evaluates results, and surveys how that layer can be made to improve
+itself.\footnote{L.~Weng, \href{https://lilianweng.github.io/posts/2026-07-04-harness/}{`Harness
+Engineering for Self-Improvement'}, Lil'Log, July 2026.} The convergence is substantial:
+the harness is largely the machinery this paper calls the owned loop, and Weng's design
+patterns (durable state kept in files rather than in context; evaluators held outside any
+loop the agent can influence) restate two of its commitments. Where the accounts part is
+purpose. Harness engineering treats the layer as an optimization surface, up to and
+including an agent that evolves its own harness; channel engineering holds that the parts
+which keep the human's intent authoritative (the withheld gate schema, the deterministic
+corpus, the provenance record) must remain outside the agent's reach, because a loop
+that can rewrite its own evaluator is the accountability sink of Section~9, built
+deliberately. The open problems on which Weng's survey closes (weak evaluators, reward
+hacking, human oversight) are the problems this paper's commitments exist to answer.
+
 A word on evidence. This paper draws its empirical support from independent studies of
 long-context degradation, position bias, agent productivity, machine-generated context,
 reward tampering, and sycophancy, rather than from a system of its own. That is the honest
@@ -1449,7 +1472,7 @@ cycle processes}. International Electrotechnical Commission, 2006 (rev.\ 2015).\
 \noindent\textbf{3.}\enspace Bertrand Meyer---\textit{Object-Oriented Software
 Construction}, 2nd ed.\ Prentice Hall, 1997.\\*
 {\fontsize{8}{10}\selectfont\color{midb}
-\href{https://bertrandmeyer.com/wp-content/uploads/OOSC2.pdf}{https://bertrandmeyer.com/wp-content/uploads/OOSC2.pdf}}
+\href{https://bertrandmeyer.com/OOSC2/}{https://bertrandmeyer.com/OOSC2/}}
 
 
 \noindent\textbf{4.}\enspace Daniel Jackson---\textit{Software Abstractions: Logic,
@@ -1757,6 +1780,22 @@ as steps accumulate, via a self-conditioning effect.)\\*
 \href{https://arxiv.org/abs/2509.09677}{arxiv.org/abs/2509.09677}}
 
 
+\noindent\textbf{50.}\enspace L.~Weng---`Harness Engineering for Self-Improvement.'
+Lil'Log, July 2026. (Defines the harness as the system surrounding a base model that
+orchestrates planning, tool use, context management, artifact storage, and evaluation;
+surveys design patterns and self-improving-harness research, closing on open problems of
+weak evaluators, reward hacking, and human oversight.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://lilianweng.github.io/posts/2026-07-04-harness/}{lilianweng.github.io/posts/2026-07-04-harness/}}
+
+
+\noindent\textbf{51.}\enspace P.~Schmid---`The New Skill in AI is Not Prompting, It's
+Context Engineering.' philschmid.de, June 2025. (Source of the practitioner diagnosis that
+most agent failures are context failures rather than model failures.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://www.philschmid.de/context-engineering}{philschmid.de/context-engineering}}
+
+
 \normalsize
 \interlinepenalty=0\relax
 \section*{About the Author}
@@ -1765,9 +1804,8 @@ as steps accumulate, via a self-conditioning effect.)\\*
 reliability into large-scale distributed systems---infrastructure automation, Kubernetes
 platform engineering, observability, and network security---at AWS, Nutanix, Okta, and
 Amplitude, among others. He began his career in the United States Air
-Force as a Russian cryptologic linguist and digital network intelligence analyst, and
-taught collection targeting systems and strategies as adjunct faculty at the National
-Cryptologic School---communication channels under adversarial conditions were the work,
+Force as a Russian cryptologic linguist and digital network intelligence
+analyst---communication channels under adversarial conditions were the work,
 not a metaphor. Most recently, building a production observability SDK with AI brought him
 face-to-face with the failure modes described here: silent data loss, ungrounded
 assumptions, critical signal lost in a noisy medium. \emph{Channel engineering} is his
