@@ -12,12 +12,14 @@
 #     public/ folder.
 #
 # Sync rule (2026-07-13): main.tex is the sole source of truth for the paper.
-# The website serves a hand-maintained HTML render of the same text
-# (…/website/src/pages/paper.astro). Any revision to main.tex must be applied
-# to paper.astro in the same change. This script enforces the rule at the
-# publish moment: if main.tex has been edited more recently than paper.astro,
-# the build fails loudly. Pass --allow-stale-web to override deliberately
-# (mid-draft iteration); the override is explicit, never the silent default.
+# The website serves hand-maintained renders of the same text:
+#   …/website/src/pages/paper.astro   (HTML render)
+#   …/website/public/llms-full.txt    (markdown render for LLM ingestion)
+# Any revision to main.tex must be applied to every render in the same
+# change. This script enforces the rule at the publish moment: if main.tex
+# has been edited more recently than any render, the build fails loudly.
+# Pass --allow-stale-web to override deliberately (mid-draft iteration);
+# the override is explicit, never the silent default.
 #
 # Usage:  ./build.sh [--allow-stale-web]
 #
@@ -40,29 +42,38 @@ cd "$SCRIPT_DIR"
 # git-state edge cases (paper.astro may be uncommitted while being written).
 mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null; }
 
-WEB_ASTRO="$SCRIPT_DIR/../../website/src/pages/paper.astro"
-if [ -f "$WEB_ASTRO" ]; then
+WEBSITE_DIR="$SCRIPT_DIR/../../website"
+WEB_RENDERS=(
+  "$WEBSITE_DIR/src/pages/paper.astro"
+  "$WEBSITE_DIR/public/llms-full.txt"
+)
+if [ -d "$WEBSITE_DIR" ]; then
   TEX_T="$(mtime "$SCRIPT_DIR/main.tex")"
-  WEB_T="$(mtime "$WEB_ASTRO")"
-  if [ "$TEX_T" -gt "$WEB_T" ]; then
-    if [ "$ALLOW_STALE_WEB" -eq 1 ]; then
-      echo "==> WARNING: main.tex is newer than the website HTML render (override accepted)."
-    else
-      echo "" >&2
-      echo "error: main.tex is newer than the website HTML render." >&2
-      echo "       main.tex is the sole source of truth; apply the same revision to" >&2
-      echo "       $WEB_ASTRO" >&2
-      echo "       in the same change, then rebuild. To build anyway (mid-draft" >&2
-      echo "       iteration), pass --allow-stale-web explicitly." >&2
-      exit 1
+  for render in "${WEB_RENDERS[@]}"; do
+    if [ ! -f "$render" ]; then
+      echo "error: website checkout found but $(basename "$render") is missing." >&2
+      echo "       The web renders are published surfaces; restore $render" >&2
+      echo "       or pass --allow-stale-web." >&2
+      [ "$ALLOW_STALE_WEB" -eq 1 ] || exit 1
+      continue
     fi
-  else
-    echo "==> web render sync: paper.astro is current (or newer) — ok"
-  fi
-elif [ -d "$SCRIPT_DIR/../../website" ]; then
-  echo "error: website checkout found but src/pages/paper.astro is missing." >&2
-  echo "       The HTML render is a published surface; restore it or pass --allow-stale-web." >&2
-  [ "$ALLOW_STALE_WEB" -eq 1 ] || exit 1
+    WEB_T="$(mtime "$render")"
+    if [ "$TEX_T" -gt "$WEB_T" ]; then
+      if [ "$ALLOW_STALE_WEB" -eq 1 ]; then
+        echo "==> WARNING: main.tex is newer than $(basename "$render") (override accepted)."
+      else
+        echo "" >&2
+        echo "error: main.tex is newer than the web render $(basename "$render")." >&2
+        echo "       main.tex is the sole source of truth; apply the same revision to" >&2
+        echo "       $render" >&2
+        echo "       in the same change, then rebuild. To build anyway (mid-draft" >&2
+        echo "       iteration), pass --allow-stale-web explicitly." >&2
+        exit 1
+      fi
+    else
+      echo "==> web render sync: $(basename "$render") is current (or newer) — ok"
+    fi
+  done
 else
   echo "==> website repo not checked out alongside — web sync gate skipped"
 fi
