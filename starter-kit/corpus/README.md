@@ -2,8 +2,8 @@
 
 The corpus is the project's durable, retrievable memory. Two rules make it trustworthy:
 
-1. **It only grows through validated work.** A decision enters the corpus when it passes a
-   gate — with its evidence. (See [`../gates/`](../gates/).)
+1. **It only grows through validated, human-promoted work.** A decision enters the corpus when
+   it passes a gate and a human promotes it, with its evidence. (See [`../gates/`](../gates/).)
 2. **It is extractive, never generative.** Entries are real decisions and excerpts with
    provenance. Nothing is a model-generated summary that could invent a rationale no one gave.
    Extraction can omit; it can never invent.
@@ -13,7 +13,7 @@ The corpus is the project's durable, retrievable memory. Two rules make it trust
 ```
 corpus/
   decisions/   one record per validated decision (what, why, evidence)
-  standards/   the durable rules those decisions produce — what you retrieve when re-grounding
+  standards/   the durable rules those decisions produce, what you retrieve when re-grounding
 ```
 
 ## Why git-tracked

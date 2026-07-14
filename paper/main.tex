@@ -82,6 +82,7 @@
 \setstretch{1.45}
 \setlength{\parskip}{7pt}
 \setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{1.5em} % resolve marginal overfulls without visible damage
 \microtypesetup{tracking=true}
 \interfootnotelinepenalty=10000  % keep a footnote whole rather than split it across a page break
 
@@ -103,8 +104,8 @@
 
 \titleformat{\section}
   {\headingfont\fontsize{15}{19}\bfseries\color{nearblack}}
-  {}
-  {0pt}
+  {{\color{indigo}\thesection}}
+  {0.7em}
   {\vspace{2pt}}
   [\sectionrule]
 
@@ -259,7 +260,8 @@ Restoring Software Engineering Discipline in the Age of LLMs}
 \section*{Abstract}
 
 Large language models have upended the economics of software production.
-The per-token cost of generating code, documentation, and test suites has collapsed.
+Code, documentation, and test suites that once took days of engineering labor can now be
+drafted in minutes.
 Yet reliability has not kept pace with capability: studies report that the large majority
 of organizations deploying LLMs encounter major production failures, that developers can
 be measurably slower on real tasks, and that practitioner trust in the output is falling
@@ -280,10 +282,12 @@ effectiveness problem of producing the intended outcome. The semantic and effect
 levels, where reliability is lost, are the levels token curation alone cannot reach, and
 the levels the field's evidence has not yet measured directly. We argue the difference is
 ownership: you cannot engineer a channel you do not own. Effective channel engineering
-requires control of the whole agent loop (assembly, budget, and retention) together with
-deterministic, extractive memory, non-gameable validation gates, mode-dependent context
-assembly, and re-grounding at every step, because per-step reliability compounds across
-the many steps of agentic work.
+requires control of the whole agent loop (assembly, budget, and retention); a context
+window treated as a sliding attention viewport over a durable record, rather than as a
+buffer the work must be compressed to fit; deterministic, extractive memory;
+independent, tamper-resistant validation gates; mode-dependent context assembly; and
+re-grounding at every step,
+because per-step reliability compounds across the many steps of agentic work.
 
 We trace the historical roots of software reliability engineering in aerospace
 (DO-178C), medical devices (IEC 62304), and formal methods (Meyer, Jackson,
@@ -296,10 +300,11 @@ The paper also introduces the \textbf{Socium model}, an application of channel e
 to human-AI collaboration, in which the partnership is treated as a distributed system, the
 context window is treated as a communication channel, and the accumulated decisions and
 artifacts of the work are treated as a shared corpus of durable intelligence.
-This paper is a synthesis: it assembles converging work into a connected argument, takes
-positions the field will test, and names a gap, the semantic and effectiveness levels,
-that the field's current evidence does not yet measure directly.
-We conclude with a set of practical
+This paper is a position paper and a research agenda: a synthesis that assembles
+converging work into a connected argument, takes falsifiable positions the field can
+test, names a gap, the semantic and effectiveness levels, that current evidence does not
+yet measure directly, and specifies the experiments that would test its distinctive
+claims. We conclude with a set of practical
 principles for channel engineering and a call for the field to treat LLM reliability as
 an engineering problem to be solved alongside model improvement, not downstream of it.
 
@@ -321,12 +326,13 @@ the last two years cuts against that hope. In a 2026 survey of two hundred engin
 leaders, 82\% reported at least one major production failure caused by AI-generated code
 in the preceding six
 months.\footnote{New Relic / Hanover Research, \href{https://newrelic.com/blog/ai/state-of-ai-coding-2026}{\textit{The 2026 State of AI Coding Report}} (survey of 200 U.S. engineering leaders).}
-That report's estimate that AI-authored code introduces roughly 1.7 times more critical
-runtime defects than human-authored code is independently echoed by an analysis of 470
-open-source pull requests, in which AI-assisted submissions averaged 10.8 issues each
-against 6.5 for human-authored, and corroborated by a security evaluation placing
-AI-generated code 2.74 times more likely to contain a known
-vulnerability.\footnote{CodeRabbit, \href{https://coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report}{\textit{State of AI vs Human Code Generation}}, 2025 (470 GitHub PRs, Poisson rate-ratio comparison); Veracode, \href{https://www.veracode.com/wp-content/uploads/2025_GenAI_Code_Security_Report_Final.pdf}{\textit{2025 GenAI Code Security Report}} (100+ models; 45\% of generations introduce a known flaw).}
+The defect data points the same way. In an analysis of 470 open-source pull requests,
+AI-assisted submissions averaged 10.8 issues each against 6.5 for human-authored,
+roughly 1.7 times more overall, with security issues up to 2.74 times higher in the
+worst category.\footnote{CodeRabbit, \href{https://coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report}{\textit{State of AI vs Human Code Generation}}, 2025: 470 GitHub PRs, compared via Poisson rate ratios. The 1.7x is issues overall (critical and major categories range 1.4--1.7x); the 2.74x is the maximum across security categories. New Relic's report cites this same analysis for its defect multiplier; the two are one source, not two.}
+A separate security evaluation spanning more than one hundred models found 45\% of
+generations introduce a known
+vulnerability.\footnote{Veracode, \href{https://www.veracode.com/wp-content/uploads/2025_GenAI_Code_Security_Report_Final.pdf}{\textit{2025 GenAI Code Security Report}} (100+ models across four languages; 45\% of generations introduce an OWASP Top~10 flaw).}
 A randomized controlled trial published by METR in 2025 found that experienced
 open-source developers were, contrary to their own forecasts, 19\% \emph{slower} when
 allowed to use the AI tools of the
@@ -343,7 +349,17 @@ output, and a sufficiently capable model would paper over many channel defects.
 The claim of this paper is narrower, and harder to dismiss: capability and the channel
 are \emph{complements}, and the field has poured almost all of its visible investment into
 the former while leaving the latter under-engineered. If this is right, reliability lives
-disproportionately in the half no one is building.
+disproportionately in the half the field has barely begun to build. The beginning is
+real: the research literature has lately given that half a name, the \emph{harness}, and
+begun surveying it as an engineering discipline and measuring it as an economic
+effect.\footnote{L.~Weng,
+\href{https://lilianweng.github.io/posts/2026-07-04-harness/}{`Harness Engineering for
+Self-Improvement'}, Lil'Log, July 2026, surveys the design space, angled at
+self-improving systems; a thirty-three-author industry study,
+\href{https://arxiv.org/abs/2607.06906}{`The Harness Effect'}, arXiv:2607.06906, 2026,
+reports that on its enterprise workload, orchestration design cut blended cost per task
+by more than switching between the cheapest and most expensive model did (41\% against
+36\%, with per-model gains of 33--61\%). Section~12 takes up the relationship.} A name, though, is not yet a practice.
 
 The reliability problem in LLM-assisted development mirrors, almost exactly, the
 reliability problem that motivated the development of software engineering as a discipline
@@ -393,10 +409,14 @@ Weaver distinguished three levels of communication problem. \textbf{Level A}, th
 B}, the \emph{semantic} problem: how precisely do the transmitted symbols convey the
 intended meaning? \textbf{Level C}, the \emph{effectiveness} problem: how well does the
 received meaning produce the intended conduct? Channel engineering is the discipline of
-engineering all three levels of the human-AI channel. The
-mainstream effort to curate what enters the context window is sophisticated work at Level
-A. If reliability is lost at B and C---as we argue below---then token curation alone
-cannot reach it.
+engineering all three levels of the human-AI channel. The mainstream effort to curate
+what enters the context window works mostly at the technical level, though the boundary
+is not clean; selecting what to say is already partly a semantic act. The sharper
+distinction is architectural. Context engineering optimizes the model-visible state;
+channel engineering governs the whole stateful protocol around generation: ingestion,
+authority, durable state, validation, recovery, and accountable effects. If reliability
+is lost at B and C, as we argue below, curating the visible state alone cannot recover
+it.
 
 \subsection{The Context Window Is the Medium, Not the Channel}
 
@@ -408,8 +428,8 @@ rendered into a specification the model can act on), the \emph{shared code} (the
 accumulated conventions and decisions that let a symbol carry the same meaning to both
 parties), the \emph{feedback path} (the validation that detects corruption and demands
 retransmission), and the \emph{decoding} (how the model's output is checked back against
-intent). Engineering only the medium, packing the window well, addresses Weaver's Level
-A and stops there.
+intent). Engineering only the medium, packing the window well, addresses mostly Weaver's
+technical level and stops there.
 
 This sense of `channel' should be distinguished from a parallel line of work that models
 the language model \emph{itself} as a noisy channel and asks after its
@@ -474,7 +494,8 @@ it survives every improvement in the endpoints. Engineering the channel means ac
 for it explicitly:
 placing the constraints that matter where attention is highest, and never assuming that
 information merely \emph{present} in the window is information the model is actually
-using.
+using. The remedy this physics demands (a different model of what the window
+\emph{is}) is stated in Section~4.
 
 \subsection{You Cannot Engineer a Channel You Do Not Own}
 
@@ -554,7 +575,7 @@ maintaining an audit trail that makes the history of decisions navigable and rec
 % ============================================================
 %  SECTION 3  (Executive Function)
 % ============================================================
-\section{The Other Half of the Failure: A Deficit of Executive Function}
+\section{Externalizing Executive Control}
 
 If the lossy medium is one structural source of unreliability, the process that consumes
 it is the other. The context window loses information; the model traversing it is, in a
@@ -584,8 +605,8 @@ medium loses its early tokens. \textbf{Inhibition:} asked whether a test passes,
 locally cheapest continuation is text that asserts it passes, since actually running it
 is the costlier path;
 the documented tendency of models to satisfy the letter of a check (altering a checklist
-to hide an incomplete task, editing test code so it reports success) is inhibition
-failure with a training-time cause, and it is empirically
+to hide an incomplete task, editing test code so it reports success) is consistent with
+inhibition failure, arose under specific training conditions, and is empirically
 attested.\footnote{C.~Denison et al., \href{https://arxiv.org/abs/2406.10162}{`Sycophancy
 to Subterfuge: Investigating Reward-Tampering in Large Language Models'}, arXiv:2406.10162,
 2024: a controlled study in which models trained on ordinary specification gaming
@@ -597,16 +618,25 @@ same preference structure that produces
 sycophancy.\footnote{M.~Sharma et al., \href{https://arxiv.org/abs/2310.13548}{`Towards
 Understanding Sycophancy in Language Models'}, ICLR 2024 (arXiv:2310.13548), find that
 RLHF-trained assistants consistently favor responses that match the user over responses
-that are correct.} None of these is an attention problem, and none is plausibly the kind
-of thing a larger model removes: the training signal that produces them is the same one
-that makes the models fluent and useful.
+that are correct; the completion-over-reporting mechanism suggested here is a hypothesis
+consistent with those findings, not a result they establish.} None of these is an
+attention problem, and none has been removed by scale so far: capability gains across
+recent model generations have produced only small reliability improvements on agentic
+work (Section~1). Internal control of this kind may yet improve; interpretability work
+has found workspace-like structure emerging in trained models, with reportable, reusable
+intermediate states that causally mediate multi-step
+reasoning.\footnote{Anthropic, \href{https://www.anthropic.com/research/global-workspace}{research
+on emergent global-workspace structure in language models (the `J-space')}, July 2026.}
+The design stance does not depend on where that ceiling lies: external structure
+augments whatever executive capacity the model has, and stabilizes it where it is
+weakest.
 
 This is the same conclusion the communication analysis reached, arrived at from the other
 direction. A lossy channel and a short-sighted process both demand an external structure
 that holds the goal, enforces the sequence, and makes the shortcut harder than the work.
 That structure is the design brief for everything that follows: a durable corpus and
 re-grounding stand in for the working memory the model cannot maintain; ordered,
-gated execution supplies the temporal regulation it lacks; and non-gameable validation
+gated execution supplies the temporal regulation it lacks; and independent validation
 supplies the inhibition it cannot supply itself. Channel engineering is, in this second
 light, executive function externalized.
 
@@ -628,12 +658,94 @@ failures but context failures.\footnote{P.~Schmid,
 \href{https://www.philschmid.de/context-engineering}{`The New Skill in AI is Not
 Prompting, It's Context Engineering'}, philschmid.de, June 2025.} We welcome the convergence. But context
 engineering, as practiced, is largely the discipline of curating the tokens that enter a
-window: Weaver's Level~A, and often from inside a loop one does not own. Reliability at
-the tail demands more than good packing. Five commitments mark where channel engineering
-continues past the point context engineering stops.
+window: work at and near Weaver's technical level, and often from inside a loop one does
+not own. Reliability at the tail demands more than good packing.
 
-\pullquote{Context engineering packs the window. Channel engineering owns the loop that
-fills it, and is accountable for what comes out.}
+\subsection*{The Window Is a Viewport, Not a Buffer}
+
+Underneath the two practices sit two different models of what the context window
+\emph{is}. The prevailing model treats the window as a \emph{buffer}: a container the
+work must fit inside, to be packed well, grown when possible, and compacted when full.
+This paper's model is drawn from the discipline its name honors. The window is a
+\emph{viewport}: a bounded attention aperture, re-positioned at every step over a durable
+record that lives outside the medium entirely. The record accumulates; the window does
+not. The record is never compressed to fit the medium, because the medium's job was
+never to hold the work. Its job is to carry a chosen projection of the work, reassembled
+fresh at each step.
+
+Transport engineering settled the underlying question fifty years ago. How does the
+internet move a terabyte across a medium that carries roughly 1,500 bytes at a time,
+loses some frames, reorders others, and degrades under load? By never once attempting to
+fit the file through the wire. The stream lives durably at the endpoints. A small window
+of in-flight data slides over it; sequence numbers and retransmission guarantee that the
+receiver reconstructs the exact stream; flow control sizes the window to what the path
+can actually carry rather than what it advertises. The medium carries a moving window
+over the message. It never carries the message.
+
+When you hold the field's ruling instinct against that example, it looks strange. The reflexive
+treatment of a full context window is to compress the history: to summarize the message
+itself so that it fits the medium. That is the one move transport engineering never
+makes; no engineer has proposed lossily summarizing a file because the maximum
+transmission unit is small. Transport's answer to a bounded window was not a smaller
+message; it was durability at the endpoints, sequencing, and a window that slides. And
+consider the ratios involved: a terabyte over 1,500-byte frames is a mismatch of a
+billion to one, solved and boring; a long project over a modern context window is a
+mismatch of a few hundred to one, treated as a crisis. The crisis was never the ratio.
+It is the missing layer.
+
+The transfer runs mechanism by mechanism. The durable record is the stream at the
+endpoint: the corpus,
+with its specifications, decisions, and audit trail. Context assembly is
+windowing: each step re-projects a bounded, freshly positioned working set from the
+record. Validation gates are detection and retransmission: verify at the boundary, and
+demand the work again rather than repair it in flight. Budgets are flow control: size
+the window to the medium's measured capacity, never its advertised one, and hold
+headroom below the degradation knee. And the position is carried by the medium's
+measured physics (Section~2), not by the analogy. Context rot is degradation in input
+\emph{length}: a sliding window bounds length by construction, so the degradation the
+medium imposes stays fixed at the chosen size instead of compounding as the work grows.
+The position-bias curve is degradation by \emph{location}: a window re-projected at every
+step chooses, at every step, what sits where attention is highest. Under a sliding
+window, the medium's two measured pathologies stop being weather and become parameters.
+
+The scale at which this matters is the scale at which real work is delivered. A feature
+is not a generation; it is hundreds of dependent steps across sessions that may span
+days, and the record of the work outgrows any window early (often within the first
+session) and keeps growing until the outcome ships. Under the buffer model, that
+growth is a problem to be beaten back with larger windows and lossier summaries. Under
+the viewport it is the normal case the architecture assumes: the unit of delivery is
+larger than the unit of attention, and the window's job is to keep each step well-aimed
+while the record carries the whole.
+
+The position is argued, not yet tested, and it is falsifiable: on long-horizon work, a
+bounded window re-projected from a complete record should outperform both a
+monotonically growing window and generative compaction of history, at equal model
+capability and with retrieval quality held constant across arms. The claim presumes an
+adequate selection function, not a perfect one.
+
+Two boundaries must be drawn honestly. The first is the one place transport does not
+transfer: the position of the window. TCP slides forward over contiguous bytes, where
+the next span is simply the next span. The next projection of a working record is
+nothing of the kind. The working set for a step is non-contiguous by nature (this
+decision, that distant constraint, a scattered handful of code), and choosing it is a
+content-addressed judgment whose wrong answer is a wrong output. Selection is not
+sliding. Section~7 names that problem (retrieval by causal relevance rather than surface
+similarity) and leaves it honestly unsolved; it is the weight the rest of the discipline
+carries. Nor does the discipline carry it by retrieval alone. Decomposition carries most
+of it: a specification broken into tasks with checkable acceptance criteria pre-computes
+the bulk of each step's working set, because a well-formed task names what it needs (its
+criteria, its constraints, the standards it invokes). What remains for retrieval is the
+long tail: the relevant prior decision, the conflict from two months back. Selection
+stays unsolved in general; the disciplined move is to arrange the work so the general
+problem is rarely faced in full. The second boundary is Weaver's. The transport catalog secures Level~A: it
+makes the medium dependable; it cannot make the meaning right. Everything after this
+section exists because Levels~B and~C remain: gates, specifications, and the corpus
+fight for meaning above a medium the sliding window has made trustworthy.
+
+\pullquote{Context engineering packs a buffer. Channel engineering slides a viewport
+over a record it never rewrites to fit, and owns the loop that slides it.}
+
+Five commitments follow from this single move.
 
 \subsection*{1.~Own the loop, do not plug into one}
 
@@ -652,6 +764,8 @@ and treats it as no less decisive than the model itself; Section~12 takes up the
 relationship.\footnote{L.~Weng,
 \href{https://lilianweng.github.io/posts/2026-07-04-harness/}{`Harness Engineering for
 Self-Improvement'}, Lil'Log, July 2026.}
+The viewport makes the requirement concrete: a tool that injects context into another
+agent's window can pack it; only the owner of the loop can slide it.
 Architecture is what separates acceleration from instability.
 
 \subsection*{2.~Keep durable memory deterministic}
@@ -663,7 +777,9 @@ Context Engineering for AI Agents'}, 2025, presents LLM-based compaction of conv
 history as a primary long-horizon strategy.} We take the opposite position. A generative
 step in the memory path can hallucinate, and its errors compound into every later
 package. Retention should be \emph{extractive}: it may omit, but it must not
-invent. It should be deterministic, and therefore replayable and auditable. The asymmetry the context-engineering
+invent. It should be deterministic, and therefore replayable and auditable. This is the
+record half of the viewport doctrine: the stream at the endpoint must stay truthful
+precisely because the window never holds the whole. The asymmetry the context-engineering
 survey identifies (models comprehend rich context far better than they generate
 it) argues against placing generation in the load-bearing memory path; an ETH Zurich
 evaluation in which machine-generated repository context files \emph{reduced} task
@@ -676,23 +792,28 @@ Context Files Helpful for Coding Agents?'}, arXiv:2602.11988, 2026. The study me
 generated context files, not generative compaction of conversation history; the two are
 related but distinct mechanisms.} The position is argued, not yet tested.
 
-\subsection*{3.~Make validation gates non-gameable}
+\subsection*{3.~Make validation independent and tamper-resistant}
 
-A gate that advertises its acceptance criteria to the generator it constrains invites the
-model to satisfy the letter rather than do the work: Goodhart's law restated for
+The requirements a work item must satisfy belong in the open; they are the
+specification. What must stay independent is the verification itself: the gate's
+implementation, its held-out checks, and the depth to which it validates submitted
+evidence. A generator graded against a rubric it can read verbatim will optimize the
+rubric's letter rather than do the work: Goodhart's law restated for
 AI.\footnote{C.~A.~E.~Goodhart, `Problems of Monetary Management: The U.K.\ Experience,'
 \textit{Papers in Monetary Economics}, Reserve Bank of Australia, 1975, originates the law;
 the now-standard phrasing, ``when a measure becomes a target, it ceases to be a good
 measure,'' is M.~Strathern, \href{https://doi.org/10.1017/S1062798700002660}{`Improving
-Ratings: Audit in the British University System'}, \textit{European Review} 5(3), 1997.} The
-remedy is to validate \emph{submitted} evidence after the fact rather than publish the
-test in advance. The most-cited developer frustration of 2025---output that is ``almost
-right, but not quite''---is this failure at population scale.\footnote{F.~Liu et al.,
+Ratings: Audit in the British University System'}, \textit{European Review} 5(3), 1997.} A
+generator that knows the requirements but must submit evidence to an independent
+verifier has one reliable strategy: doing the work. The most-cited developer frustration
+of 2025 (output that is ``almost
+right, but not quite'') is this failure at population scale.\footnote{F.~Liu et al.,
 \href{https://arxiv.org/abs/2404.00971}{`Beyond Functional Correctness: Exploring
 Hallucinations in LLM-Generated Code'}, IEEE TSE 2026 (arXiv:2404.00971), build a taxonomy
 of code hallucinations whose categories include conflicts with the task's requirements and
 with the surrounding project context: ``almost right'' is, concretely, fluent and plausible
-code that diverges from intent or repository reality.}
+code that diverges from intent or repository reality.} The gate is the viewport
+doctrine's feedback path; Section~8 takes up its mechanics.
 
 \subsection*{4.~Assemble by mode}
 
@@ -701,13 +822,15 @@ the authoritative statement of intent and recency-forward assembly is correct. W
 human is absent and the model is executing autonomously, the opposite holds: intent must
 be \emph{structurally re-presented}, pinned and placed where attention is highest, so
 that the goal cannot age out beneath a pile of intermediate results. Uniform context
-management ignores this; the position effects documented above make it decisive.
+management ignores this; the position effects documented above make it decisive. Mode
+selects the positioning policy for the viewport.
 
 \subsection*{5.~Re-ground at every step}
 
 Because per-step errors compound (Section~7), reliability must be re-secured at each
 step, through retrieval that re-anchors the model in project truth and gates that
-re-check its output.
+re-check its output. Re-grounding is the re-projection itself; the compounding
+arithmetic sets its cadence.
 
 
 % ============================================================
@@ -730,7 +853,7 @@ Software
 Construction},\footnote{\href{https://bertrandmeyer.com/OOSC2/}{https://bertrandmeyer.com/OOSC2/}} was
 an answer to the same problem at the level of individual modules: how do you make the
 behavior of a component reliable and verifiable independently of the competence of its
-caller? The answer was to make the contract explicit---to engineer the interface between
+caller? The answer was to make the contract explicit: to engineer the interface between
 components so that violations were detectable at the boundary.
 
 Daniel Jackson's Alloy and the broader formal methods
@@ -749,7 +872,28 @@ ways that cannot be addressed by improving individual components. The failure mo
 properties of the system's communication structure, not properties of its components. The
 solution is to engineer the communication structure explicitly.
 
-The software engineering tradition is not the only domain to have confronted the problem
+The tradition that engineered communication structure most successfully is the one this
+discipline's name honors. Transport engineering spent five decades making unreliable
+media carry reliable streams; Section~4 has already mapped its mechanisms (the sliding
+window, retransmission, flow control) onto this discipline's practices. What the
+precedent adds is proof at scale: TCP's exact reconstruction of arbitrarily long streams
+over a medium that loses, reorders, and degrades remains the largest working
+demonstration that reliability can be manufactured in the channel rather than demanded
+of the medium.
+
+The same tradition also settled where reliability functions belong. The end-to-end
+argument holds that reliability must live at the endpoints, because no improvement in
+the medium ever removes the endpoints' need to verify. Better links are welcome, and the
+original paper says so; what they cannot do is substitute for verification at the
+ends.\footnote{J.~H.~Saltzer, D.~P.~Reed, and
+D.~D.~Clark, \href{https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf}{`End-to-End
+Arguments in System Design'}, \textit{ACM Transactions on Computer Systems} 2(4), 1984.}
+Substitute `model' for `link' and the argument reads as this paper's thesis stated forty
+years early: a more capable model is a more reliable medium, and the endpoints (the
+specification that encodes intent, the gate that verifies output) must do their work
+regardless. Waiting on better models alone is link-layer thinking.
+
+Engineering traditions are not the only domains to have confronted the problem
 of staying accountable for outcomes one authorized but did not personally execute.
 Military command doctrine arrived at a direct answer, under conditions more demanding
 than software development. The doctrine is called \emph{mission command} (\textit{Auftragstaktik}
@@ -770,13 +914,19 @@ same constraint is load-bearing in human-AI systems: amplifying past the steward
 capacity to judge does not maximize reliable output per unit of human judgment; it
 produces accountability theater. This is the governing disposition behind every gate,
 every provenance record, and every audit trail in channel engineering: they exist to
-keep the human's accountability \emph{exercisable}.
+keep the human's accountability \emph{exercisable}. One corollary is strict: when the
+human cannot be reached, degraded oversight narrows the machine's autonomy rather than
+widening it. Bounded initiative within approved intent continues; what denies by default
+is new consequential authority, because no doctrine of delegation survives silence
+counting as consent. Absence is not permission.
 
 The agile movement of the 1990s and 2000s was, in part, a reaction against the overhead
 costs of formal discipline in mainstream development. This reaction was not without merit:
 the heavyweight processes of the era (waterfall, RUP, CMM) had accumulated overhead far
-beyond what the value of the discipline warranted. But the reaction overcorrected. The
-field abandoned discipline rather than right-sizing it. The `move fast' era of the 2010s
+beyond what the value of the discipline warranted. But the reaction overcorrected in a
+specific place: mainstream practice optimized for iteration speed and local feedback,
+and systematically underinvested in durable decision records, explicit cross-system
+contracts, and evidence tied to intent. The `move fast' era of the 2010s
 is the result: enormous velocity in individual components, chronic unreliability in
 systems. Empirical studies of agile teams document this de-emphasis directly: internal
 documentation and explicit specifications are systematically under-produced, and
@@ -793,8 +943,9 @@ Comprehensive Documentation: Rationales of Agile Teams for Artefacts Usage}}, JS
 % ============================================================
 \section{The Abandonment of Discipline---and Why It Matters}
 
-The formal discipline of software engineering was not abandoned because it failed. It was
-abandoned because it was expensive. Writing formal specifications, maintaining audit
+Where formal discipline did recede from mainstream practice, it did not recede because
+it failed. It receded because it was expensive. Writing formal specifications,
+maintaining audit
 trails, enforcing validation gates: these practices carry real overhead costs. For
 safety-critical systems, where the cost of failure is measured in lives, the overhead is
 clearly worth paying. For a startup building a consumer application, where the cost of
@@ -820,7 +971,9 @@ Effects of Generative AI on High-Skilled Work: Evidence from Three Field Experim
 Software Developers'}, 2025.} The exact multiplier matters less than the direction: the labor
 cost of producing and maintaining the artifacts of discipline (specifications, decision
 records, audit trails) has fallen far enough, for enough tasks, that the historical
-economic argument against discipline no longer holds by default. The discipline is not
+economic argument against discipline no longer holds automatically. The paper treats
+this as an economic hypothesis the productivity evidence makes plausible, not one it
+proves. The discipline is not
 cheaper because the intellectual requirements have changed; it is cheaper because the
 administrative labor has. And the saving is real only when it is counted net of
 validation: a draft produced in an afternoon still has to be checked, and it is the
@@ -836,8 +989,9 @@ They make it affordable, for the first time, for many.}
 \section{The Probability Space: How Context Narrows Uncertainty}
 
 A useful way to think about what an LLM does is in terms of probability distributions
-over output space. Given no context, the model's output distribution is broad: any text
-that is consistent with the pretraining distribution is approximately equally likely. As
+over output space. Given no context, the model's output distribution is broad:
+high-entropy relative to any well-specified task, with probability spread across vast
+regions of text that have nothing to do with the work at hand. As
 context is added (a system prompt, a specification, examples, prior
 conversation), the distribution narrows. The model's outputs become more specific, more
 consistent, more likely to match what the engineer intends.
@@ -866,9 +1020,10 @@ tasks; a model highly accurate in one step still fails across many. They further
 per-step accuracy itself \emph{degrades} as steps accumulate, the model conditioning on its
 own earlier mistakes: a `self-conditioning' effect
 (\href{https://arxiv.org/abs/2509.09677}{`The Illusion of Diminishing Returns: Measuring
-Long Horizon Execution in LLMs'}, ICLR 2026, arXiv:2509.09677).} This treats the steps as independent---the \emph{charitable} assumption. Real errors
-correlate: a mistake left in the window conditions every step that follows, so per-step
-accuracy degrades as the chain lengthens rather than holding flat. The independent-step
+Long Horizon Execution in LLMs'}, ICLR 2026, arXiv:2509.09677).} This treats the steps as independent: the \emph{charitable} assumption. In practice a
+mistake left in the window conditions every step that follows, and the measured
+self-conditioning effect is that per-step accuracy degrades as the chain lengthens
+rather than holding flat. The independent-step
 curve therefore understates the trouble, not overstates it; the true uncorrected decay is
 steeper still. Which is exactly why the remedy cannot be a better average step; it must
 interrupt the propagation: re-ground in project truth so the model stops conditioning on
@@ -881,8 +1036,9 @@ multi-step tasks, should have surprised no one.
 It also dictates the remedy. A chain cannot be made reliable by raising the average
 quality of a step alone; it must be \emph{re-grounded} at each step so that errors are
 caught before they propagate. Retrieval re-anchors the model in project truth at the
-moment of generation; validation gates catch corruption before it is committed. That is
-what arrests the compounding.
+moment of generation; validation gates catch corruption before it is committed.
+Re-grounding, in the terms of Section~4, is the re-projection of the viewport itself.
+That is what arrests the compounding.
 
 \subsection{The Retrieval Problem}
 
@@ -927,7 +1083,7 @@ hitting it remains hard.
       \nextgroupplot
       \addplot[draw=none, fill=cyan, fill opacity=0.18] {0.95*exp(-0.5*(x/0.35)^2)} \closedcycle;
       \addplot[draw=cyan, line width=1.4pt] {0.95*exp(-0.5*(x/0.35)^2)};
-      \node[font=\labelfont\bfseries, text=indigo] at (axis cs:0,1.1) {Full context};
+      \node[font=\labelfont\bfseries, text=indigo] at (axis cs:0,1.1) {Sufficient context};
       \node[font=\itshape\scriptsize, text=muted, align=center, anchor=north] at (axis cs:0,-0.16)
             {Narrow distribution\\Low entropy, specific output};
     \end{groupplot}
@@ -949,12 +1105,17 @@ hitting it remains hard.
 % ============================================================
 \section{The Validation Gate: Catching Channel Failures}
 
-A channel failure is an instance where the context delivered to the model was
-insufficient to constrain the output distribution to the desired region. Channel failures
-manifest as bugs, hallucinations, inconsistencies, and specification violations. In a disciplined
-development process, these failures are caught at validation gates: explicit checkpoints
-where the output is verified against the specification before it propagates into the
-codebase.
+A channel failure is an error caused by the managed interaction itself: loss, distortion,
+or omission in what was delivered; ambiguity in how intent was encoded; stale or
+conflicting state; an authority mismatch; a missing feedback path. Channel failures
+manifest as bugs, hallucinations, inconsistencies, and specification violations, but not
+every such defect is a channel failure. A model can reason wrongly over complete and
+well-formed context; a tool can fail; a verifier can be defective; the intent itself can
+be invalid. The channel and the model are complements here as everywhere; the
+discipline's claim is that the channel's share of the failures is the share nobody is
+engineering. In a disciplined development process, failures of either kind are caught at
+validation gates: explicit checkpoints where the output is verified against the
+specification before it propagates into the codebase.
 
 The concept of a validation gate is borrowed directly from hardware engineering. In chip
 design, simulation gates and formal verification checkpoints are placed at every stage of
@@ -993,16 +1154,22 @@ comparison between intent and output a formal step in the process, rather than a
 implicit assumption. This explicitness is what makes channel failures catchable and
 correctable.
 
-\subsection{Gates Must Be Non-Gameable}
+\subsection{Gates Must Be Independent and Tamper-Resistant}
 
-A gate for an LLM differs in a subtle but decisive way from a checklist for a human. If
-the acceptance criteria are visible to the generator, a capable model will optimize to
-satisfy them \emph{as stated}, producing output that passes the check without doing the
-underlying work. This is Goodhart's law restated for AI: a measure that becomes a target
-ceases to be a good measure. The defense is to validate \emph{submitted evidence after
-the fact} rather than to publish the test in advance. The gate inspects what was actually
-produced and returns an actionable verdict; the rubric stays hidden. A gate that teaches
-the model how to pass it is not a gate.
+A gate for an LLM differs in a subtle but decisive way from a checklist for a human. The
+requirements stay in the open, because they are the specification the work was approved
+against. What does not stay open is the verification. A capable model graded against a
+test harness it can read verbatim will optimize to satisfy the harness \emph{as stated},
+producing output that passes the check without doing the underlying work: a measure that
+becomes a target ceases to be a good measure. The defense is independence and
+tamper-resistance. The gate validates \emph{submitted evidence after the fact}, down to
+its content, with its implementation and its held-out checks outside the generator's
+reach; and where the check is a deterministic oracle (the test passes or it does not,
+the artifact exists or it does not), the verdict cannot be argued with, only earned. No
+evaluator is categorically beyond gaming. The design goal is a gate the generator cannot
+negotiate with and cannot rehearse against. The shape is
+transport's: detect at the boundary, request retransmission, and never trust the medium
+to correct itself. A gate that teaches the model how to pass it is not a gate.
 
 \pullquote{A validation gate is not bureaucracy. It is the moment when the engineer's
 intent and the model's output are placed in the same frame and compared.}
@@ -1120,6 +1287,27 @@ model that generates code that is locally correct but globally incompatible.
 \pullquote{The socium is the interwoven substrate: accumulated decisions that belong to
 neither participant alone, and that persist when either participant is swapped out.}
 
+What makes the corpus trustworthy is not only what it holds but when it is written. The
+discipline is write-ahead: the record of an action precedes the action's visible effect,
+and no step proceeds until the record of the last one is durable. An audit trail written
+after the fact is a diary; one written ahead of the act is provenance. Databases settled
+this principle decades ago, for the same reason, under the name write-ahead logging: a
+system that must stay honest across failure records intent before effect. Two
+consequences follow. There is no unaudited interval, because nothing you see, and
+nothing the model does next, outruns the record. And every accepted unit of work carries
+one durable identity and reaches one recorded terminal state, committed, failed,
+cancelled, or honestly unresolved, even across a crash; a retry can never silently
+create a second committed outcome. Work can fail, and its effect on the world can even
+be unknown, but it cannot vanish.
+
+Durable, though, is not the same as true. The record accumulates wrong decisions,
+superseded requirements, and conflicting sources, and in an adversarial setting it can
+accumulate injected content; durability preserves all of it faithfully. A trustworthy
+corpus therefore carries obligations beyond retention: provenance on every entry,
+explicit supersession when a decision is revised, and conflict surfaced rather than
+silently resolved. Write-ahead discipline guarantees the record is complete and honest
+about what happened. Keeping it current and trusted is curation, and it never stops.
+
 The Socium model implies a specific kind of development process. Work proceeds through a
 cycle of specification, generation, validation, and corpus update. The specification
 phase produces a structured artifact that constrains the generation. The generation phase
@@ -1196,7 +1384,7 @@ A feature does not begin with a prompt. It begins with a \emph{specification}, a
 set of artifacts: business requirements, technical design, and a task breakdown in which
 every task carries explicit, checkable acceptance criteria. The specification is authored
 in its own gated workflow, and is not advanced to implementation until a human approves it.
-This is the moment the output distribution is narrowed---before a line of code is
+This is the moment the output distribution is narrowed, before a line of code is
 generated.\footnote{Q.~Ma et al., \href{https://arxiv.org/abs/2409.08775}{`What Should We
 Engineer in Prompts? Training Humans in Requirement-Driven LLM Use'}, ACM TOCHI 2025
 (arXiv:2409.08775): in a randomized controlled experiment, training novices to articulate
@@ -1204,19 +1392,37 @@ explicit requirements outperformed conventional prompt-engineering training twen
 to one, a gap automatic prompt optimization did not close. Input quality lives in the
 requirements, not the phrasing.}
 
-Implementation then proceeds one task at a time. Before generating, the agent retrieves the
+Approval, though, has a blind spot that deserves naming. You review the specification as
+a readable artifact; the machine executes its parse of that artifact; and content review
+cannot see parse divergence. A work item silently dropped in translation is approved but
+never executed, and nobody is positioned to notice, because the reviewer checked the
+prose and the prose was right. The discipline's answer is ingestion fidelity: the
+machine runs exactly the plan you approved or refuses loudly, and it reports its parse
+back (so many phases, so many tasks, by name) so you can recognize your plan in what it
+ingested. The mechanism is the acknowledgment leg the channel frame already implies:
+transport has the ACK, voice procedure has the read-back, the receiver proving what it
+heard before anyone acts on it. It is the same validation discipline the gates of
+Section~8 apply to output, turned to face intent: the gate compares what came out
+against what was intended; the read-back confirms that what went in is what was
+approved.
+
+Implementation then proceeds one task at a time; the task is the unit of projection as
+well as the unit of work. Before generating, the agent retrieves the
 project's own standards for the work at hand, re-grounding in project truth rather than
 trusting the residue left in the window. It writes the code and its tests, then submits the
-result to a validation gate. The gate is designed to be non-gameable by construction: the
-evidence schema it checks against is \emph{withheld from the generating agent}, so the
-model cannot optimize to the rubric. It can only submit proof artifacts (test output,
-file listings, command results), which the gate validates after the fact, down to their
-content. When implemented as specified, a failed gate halts advancement; an autonomous
-run cannot self-certify its way past it.
+result to a validation gate. The gate is independent by construction: the requirements
+live in the approved specification, while the verifier itself
+(which proof artifacts, validated to what depth, against which held-out cases) stays
+\emph{outside the generating agent's reach}, so the
+model cannot rehearse against it. It can only submit proof artifacts (test
+output, file listings, command results), which the gate validates after the fact, down
+to their content. When implemented as specified, a failed gate halts advancement; an
+autonomous run cannot self-certify its way past it.
 
-Only validated work updates the corpus. The acceptance criteria are marked complete, an
-evidence record is appended, and the decision joins the durable corpus of specifications,
-standards, and audit trails. When a later session (a fresh, stateless model with no memory
+Only validated, human-promoted work updates the corpus: passing a gate makes work eligible,
+a human's judgment makes it authoritative. The acceptance criteria are marked complete, a
+human promotes the result, an evidence record is appended, and the decision joins the durable
+corpus of specifications, standards, and audit trails. When a later session (a fresh, stateless model with no memory
 of this work) meets a related problem, it retrieves that decision through the same channel.
 Each validated task leaves the next one better grounded than the last: the loop is built to
 compound reliability rather than erode it.
@@ -1230,18 +1436,19 @@ compound reliability rather than erode it.
 \vskip5pt
 {\fontsize{9.5}{13.5}\selectfont
 \textbf{Spec.}\; Task~3.2, ``add bounded retry to the upload client,'' carries one
-\emph{checkable} acceptance criterion: \emph{retries are bounded, backoff is exponential,
-and a test proves no retry on a 4xx response}. A human approves the spec before a line of
-code is generated.\par
+\emph{checkable} acceptance criterion: \emph{retries are bounded (at most ten), backoff
+is exponential, and a test proves no retry on a 4xx response}. A human approves the spec
+before a line of code is generated.\par
 \vskip4pt
-\textbf{Gate (withheld).}\; The evidence schema the gate enforces is never shown to the
-generating agent:\par
+\textbf{Gate (independent).}\; The criteria are public; they are the spec above. What the
+agent cannot do is run the checker, edit it, or self-attest past it. The verifier enforces:\par
 \vskip2pt
 \hspace*{10pt}\texttt{require test\_output : artifact}\par
 \hspace*{10pt}\texttt{assert  max\_retries <= 10}\par
 \hspace*{10pt}\texttt{assert  proof : no\_retry\_on\_4xx}\par
 \vskip2pt
-The agent cannot shape its work to a rubric it cannot read.\par
+Knowing the criteria is not enough: the agent must submit evidence the checker validates, and
+cannot pass by asserting success.\par
 \vskip4pt
 \textbf{Proof.}\; It submits artifacts, not assurances:\par
 \vskip2pt
@@ -1287,32 +1494,35 @@ the desired output.
 The accumulated work of the project should be organized as a retrievable artifact, not
 scattered across files, chat histories, and tickets. The corpus is the project's memory;
 it should be as deliberately maintained as the codebase, and it should be
-\emph{deterministic and auditable}. When the corpus must be condensed to fit, prefer
-extraction (selecting verbatim content with its provenance) over generative summary: a
-summary that hallucinates poisons every future retrieval, while extraction can only omit,
-never invent.
+\emph{deterministic and auditable}. The corpus itself is never condensed to fit the
+window: the record accumulates, and the window carries only each step's projection of it
+(Section~4). Where a projection must be condensed, prefer extraction (selecting verbatim
+content with its provenance) over generative summary: a summary that hallucinates poisons
+every future retrieval, while extraction can only omit, never invent.
 
-\principletest{If condensing the corpus can produce a sentence no source ever wrote, every future retrieval can inherit the invention.}
+\principletest{If condensation can produce a sentence no source ever wrote, every future retrieval can inherit the invention.}
 
 \subsection*{4.~Write specifications before generating}
 
 Every significant generation task should be preceded by a specification: a structured
 description of what the output should do, what constraints it should satisfy, and how it
 will be validated. The specification is the instrument that narrows the output
-distribution before generation begins.
+distribution before generation begins. It narrows the selection problem for the same
+reason: a task with checkable criteria names most of its own working set.
 
 \principletest{If you cannot state how the output will be checked before you generate it, you have a prompt, not a specification.}
 
-\subsection*{5.~Place non-gameable validation gates before commits}
+\subsection*{5.~Place independent validation gates before commits}
 
 Every generated artifact should pass through a validation gate before it is committed to
 the codebase. The gate may be a human review, an automated test suite, a static analyzer,
 or a combination. The key property is that it is explicit: intent and output are compared
-at a formal checkpoint. Where the generator is itself an LLM, the gate should validate
-submitted evidence after the fact rather than advertise its acceptance criteria in
-advance; otherwise the model optimizes to pass the test rather than to do the work.
+at a formal checkpoint. Where the generator is itself an LLM, the requirements belong in
+the specification and the verification belongs out of the generator's hands: the gate
+validates submitted evidence after the fact, with its implementation and held-out checks
+independent; otherwise the model optimizes to pass the test rather than to do the work.
 
-\principletest{If an agent that could read the gate's criteria could still pass without doing the work, it is a rubric, not a gate.}
+\principletest{If an agent that could read the gate's test harness could still pass without doing the work, it is a rubric, not a gate.}
 
 \subsection*{6.~Update the corpus on every validated decision}
 
@@ -1327,7 +1537,8 @@ their absence degrades the quality of future generations.
 Distinguish human-in-the-loop work from autonomous execution. When a human is present,
 let the conversational tail carry intent. When the model runs unattended, pin the goal
 and re-present it where attention is highest, so it cannot age out beneath intermediate
-results. One assembly strategy does not serve both.
+results. Assembly is viewport positioning, and the mode chooses the policy. One assembly
+strategy does not serve both.
 
 \principletest{At step~20 of an unattended run, check whether the goal still sits where attention is highest. If intermediate results have displaced it, your assembly was designed for a conversation that is not happening.}
 
@@ -1342,7 +1553,7 @@ configured once.
 
 \subsection*{9.~Treat reliability as an engineering problem, not a model problem}
 
-When a generation fails---when the output does not match the intent---diagnose the
+When a generation fails and the output does not match the intent, diagnose the
 channel before you blame the model. Ask what context was missing, what specification was
 ambiguous, what validation gate failed to catch the error. The model is a component; the
 channel is the system.
@@ -1366,10 +1577,12 @@ commitments, grounded in the software-engineering reliability tradition, for eng
 the channel one owns.
 
 It departs from practitioner context engineering in three specific places. Context
-engineering, as practiced, curates the tokens that enter a window (Weaver's Level~A) and
+engineering, as practiced, curates the tokens that enter a window (work at and near
+Weaver's technical level) and
 frequently does so from inside a loop it does not control. On durable memory it recommends
-generative compaction; this paper argues the opposite, for extractive, deterministic
-retention. And it treats validation as advisory rather than as a non-gameable gate. Each
+generative compaction; this paper argues the opposite: extractive, deterministic
+retention beneath a window that is re-projected rather than packed (Section~4). And it
+treats validation as advisory rather than as an independent, tamper-resistant gate. Each
 departure is a place where reliability at the tail demands more than good packing.
 
 It is also complementary to the inference-time reliability
@@ -1395,7 +1608,7 @@ patterns (durable state kept in files rather than in context; evaluators held ou
 loop the agent can influence) restate two of its commitments. Where the accounts part is
 purpose. Harness engineering treats the layer as an optimization surface, up to and
 including an agent that evolves its own harness; channel engineering holds that the parts
-which keep the human's intent authoritative (the withheld gate schema, the deterministic
+which keep the human's intent authoritative (the independent verifier, the deterministic
 corpus, the provenance record) must remain outside the agent's reach, because a loop
 that can rewrite its own evaluator is the accountability sink of Section~9, built
 deliberately. The open problems on which Weng's survey closes (weak evaluators, reward
@@ -1408,10 +1621,28 @@ boundary of a synthesis: it organizes and argues; it does not yet measure. The n
 step, and the one that would distinguish this account from its neighbors, is the controlled
 measurement of these commitments inside a system that owns the full loop.
 
-What remains particular to this account, then, is three things
+\subsection*{The Empirical Program}
+
+That measurement is specifiable now. Four experiments correspond to this paper's
+distinctive claims. \textbf{Viewport:} on long-horizon task suites, compare a
+monotonically growing window, generative compaction, and deterministic re-projection
+from a durable record, holding model, tasks, corpus, and token budget fixed (the
+prediction of Section~4). \textbf{Ingestion fidelity:} mutation-test plan ingestion with
+dropped, duplicated, reordered, and ambiguous work items, and measure silent divergence
+between the approved plan and the executed one (Section~10). \textbf{Gates:} compare
+disclosed requirements with independent, held-out verification against fully disclosed
+test harnesses, measuring task success, gaming rate, and false rejection (Section~8).
+\textbf{Crash consistency:} inject failures before and after every durable transition
+and external effect, and verify one recorded terminal state per unit of work with no
+silent duplicate commits (Section~10). Until those numbers exist, this paper is a
+position and a research agenda, and it asks to be read as one.
+
+What remains particular to this account, then, is four things
 the surrounding literature does not combine: the diagnosis of long-horizon failure as a
 functional \emph{executive-function} deficit (behaviors that match, mechanisms that may
-not) rather than a deficit of capability or attention; the explicit, falsifiable
+not) rather than a deficit of capability or attention; the treatment of the context
+window as a sliding attention viewport over a durable record, an argued and falsifiable
+position on context rot (Section~4); the explicit, falsifiable
 preference for deterministic memory over generative compaction; and the reconstruction of
 LLM reliability as the next chapter of an engineering tradition that already knows how
 to make capable but inconsistent agents reliable.
@@ -1454,6 +1685,7 @@ into practice at Socium; if you are working on the same problem, the conversatio
 \section*{References}
 
 \footnotesize
+\sloppy
 \setlength{\parskip}{3pt plus 1.5pt minus 0.5pt}
 \interlinepenalty=10000\relax
 
@@ -1690,14 +1922,16 @@ the term `accountability sink'; builds on Stafford Beer's management cybernetics
 
 \noindent\textbf{39.}\enspace CodeRabbit---`State of AI vs Human Code Generation.' 2025.
 (470 open-source GitHub PRs; AI-co-authored changes averaged 10.83 issues per PR vs.\ 6.45
-for human-only---approx.\ 1.7x---compared via Poisson rate ratios with 95\% CIs.)\\*
+for human-only, approx.\ 1.7x overall with security categories up to 2.74x, compared via
+Poisson rate ratios with 95\% CIs. New Relic's 2026 report cites this analysis for its
+defect multiplier.)\\*
 {\fontsize{8}{10}\selectfont\color{midb}
 \href{https://coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report}{coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report}}
 
 
 \noindent\textbf{40.}\enspace Veracode---`2025 GenAI Code Security Report.' 2025.
-(100+ models across four languages; AI-generated code 2.74x more likely to contain a known
-vulnerability, with 45\% of generations introducing an OWASP Top 10 flaw.)\\*
+(100+ models across four languages; 45\% of generations introduce an OWASP Top 10
+flaw.)\\*
 {\fontsize{8}{10}\selectfont\color{midb}
 \href{https://www.veracode.com/wp-content/uploads/2025_GenAI_Code_Security_Report_Final.pdf}{veracode.com/wp-content/uploads/2025\_GenAI\_Code\_Security\_Report\_Final.pdf}}
 
@@ -1794,6 +2028,26 @@ Context Engineering.' philschmid.de, June 2025. (Source of the practitioner diag
 most agent failures are context failures rather than model failures.)\\*
 {\fontsize{8}{10}\selectfont\color{midb}
 \href{https://www.philschmid.de/context-engineering}{philschmid.de/context-engineering}}
+
+
+\noindent\textbf{52.}\enspace J.~H.~Saltzer, D.~P.~Reed, and D.~D.~Clark---`End-to-End
+Arguments in System Design.' \textit{ACM Transactions on Computer Systems} 2(4):277--288,
+1984. (Reliability functions belong at the endpoints; no improvement in the medium removes
+the endpoints' need to verify. The transport tradition's answer to `wait for a better
+link,' and this paper's answer to `wait for a better model.')\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf}{web.mit.edu/Saltzer/www/publications/endtoend/}}
+
+
+\noindent\textbf{53.}\enspace M.~Sayed~Ali et al.---`The Harness Effect: How Orchestration
+Design Sets the Token Economics of Enterprise Agentic AI.' arXiv:2607.06906, 2026.
+(Controlled comparison across six models and two orchestrations; reports the harness cut
+blended cost per task 41\%, against the 36\% available from switching between the
+cheapest and most expensive model, with per-model gains of 33--61\%. All thirty-three
+authors are affiliated with the vendor of the evaluated harness; the token and cost
+accounting is the load-bearing result.)\\*
+{\fontsize{8}{10}\selectfont\color{midb}
+\href{https://arxiv.org/abs/2607.06906}{arxiv.org/abs/2607.06906}}
 
 
 \normalsize

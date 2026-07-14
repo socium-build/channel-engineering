@@ -6,7 +6,7 @@
 #   - Runs from any working directory (resolves its own location, so the
 #     relative `fonts/` paths in main.tex always resolve).
 #   - Auto-discovers XeLaTeX if it isn't already on PATH (TinyTeX, TeX Live,
-#     MacTeX, Homebrew) — no machine-specific paths baked into the source.
+#     MacTeX, Homebrew), no machine-specific paths baked into the source.
 #   - Writes build artifacts to ./build/ (git-ignored) and copies the final
 #     PDF to ../docs/ (committed) and, if present, the sibling website's
 #     public/ folder.
@@ -37,7 +37,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # ── Web render sync gate (see header: sync rule) ────────────
-# Heuristic: file mtimes on the working tree — honest for a single
+# Heuristic: file mtimes on the working tree, honest for a single
 # maintainer on one machine ("which did I edit last"), cheap, and free of
 # git-state edge cases (paper.astro may be uncommitted while being written).
 mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null; }
@@ -71,11 +71,11 @@ if [ -d "$WEBSITE_DIR" ]; then
         exit 1
       fi
     else
-      echo "==> web render sync: $(basename "$render") is current (or newer) — ok"
+      echo "==> web render sync: $(basename "$render") is current (or newer), ok"
     fi
   done
 else
-  echo "==> website repo not checked out alongside — web sync gate skipped"
+  echo "==> website repo not checked out alongside; web sync gate skipped"
 fi
 
 # ── Locate xelatex ──────────────────────────────────────────
@@ -129,7 +129,7 @@ if [ -d "$(dirname "$WEBSITE_PDF")" ]; then
   cp "$PDF" "$WEBSITE_PDF"
   echo "==> synced -> ${WEBSITE_PDF}"
 else
-  echo "==> website public/ not found alongside repo — skipped site copy"
+  echo "==> website public/ not found alongside repo; skipped site copy"
 fi
 
 echo "Done."

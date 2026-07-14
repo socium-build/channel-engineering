@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
-"""A minimal, non-gameable validation gate.
+"""A minimal validation gate with an independent decision point.
 
-The point of this script is the *information asymmetry*, not the validation logic:
+The point of this script is *independence of the verdict*, not secrecy:
 
-    The acceptance schema (gate-spec) is a file the GENERATING AGENT NEVER SEES.
-    The agent only knows it must submit an evidence file plus the artifacts it
-    references. The gate validates that submission AFTER THE FACT, down to the
-    content of the artifacts.
+    The generating agent knows the acceptance criteria (they live in the approved
+    spec, so it can aim at them). What it does NOT get is the power to run this
+    checker, edit it, or pass it by asserting success. It submits an evidence file
+    plus the artifacts it references, and the gate validates that submission AFTER
+    THE FACT, down to the content of the artifacts.
 
-Because the agent cannot read the rubric, it cannot shape its work to pass the
-rubric without doing the work. A bare claim ("done": true) cannot satisfy an
-`artifact` requirement, and a self-attested boolean is never trusted as proof.
+Knowing the criteria is not enough to pass: a bare claim ("done": true) cannot
+satisfy an `artifact` requirement, and a self-attested boolean is never trusted as
+proof. Public contract, private verifier.
 
-Zero dependencies — Python 3.8+ standard library only.
+Scope: this validates evidence the agent *submits*, so it is not tamper-proof; an
+agent that writes the artifact can forge it. To make the evidence unforgeable, have
+the gate PRODUCE it (run the held-out test itself, or read a runner the agent cannot
+write to). This script demonstrates the evidence contract and the independent
+decision point; the anti-forgery boundary is the seam a full implementation adds.
+
+Zero dependencies; Python 3.8+ standard library only.
 
 Usage:
     python3 gate.py --spec gate-spec.example.json --evidence evidence.example.json
@@ -82,8 +89,8 @@ def check_field(rule: dict, evidence: dict, root: str) -> list[str]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Non-gameable validation gate.")
-    ap.add_argument("--spec", required=True, help="gate-spec JSON (withheld from the agent)")
+    ap = argparse.ArgumentParser(description="Validation gate with an independent decision point (evidence contract; not anti-forgery).")
+    ap.add_argument("--spec", required=True, help="gate-spec JSON (the checker's criteria; the agent submits evidence, it does not run this)")
     ap.add_argument("--evidence", required=True, help="evidence JSON submitted by the agent")
     ap.add_argument("--root", help="base dir for artifact paths (default: evidence file dir)")
     args = ap.parse_args()
@@ -105,7 +112,7 @@ def main() -> int:
         print("GATE FAILED:")
         for msg in all_fails:
             print(f"  - {msg}")
-        print("\nThe submission did not satisfy the (withheld) acceptance schema.")
+        print("\nThe submission did not satisfy the acceptance criteria.")
         return 1
 
     print("GATE PASSED: all required evidence present and validated.")

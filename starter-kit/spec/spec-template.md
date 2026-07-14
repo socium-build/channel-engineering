@@ -1,7 +1,7 @@
 # Spec: <feature name>
 
 > A spec is the instrument that narrows the output distribution **before** generation.
-> Its job is to make every task's success *checkable* — by a gate, not by a vibe.
+> Its job is to make every task's success *checkable*, by a gate, not by a vibe.
 > A human approves this spec before any code is generated.
 
 **Status:** draft | approved
@@ -10,7 +10,7 @@
 
 ---
 
-## Context — why this work exists
+## Context: why this work exists
 
 <2–4 sentences. The problem, and why now. Pulled from the design doc; don't re-litigate
 the design here.>
@@ -18,7 +18,7 @@ the design here.>
 ## Goals / Non-goals
 
 - **Goals:** <what this delivers>
-- **Non-goals:** <what this deliberately does not do — bounds the work>
+- **Non-goals:** <what this deliberately does not do, to bound the work>
 
 ## Requirements
 
@@ -32,11 +32,11 @@ the design here.>
 Each task is small enough to generate, validate, and commit on its own. Every task carries
 **checkable acceptance criteria** and names the **evidence** a gate will validate.
 
-### Task 1.1 — <short imperative description>
+### Task 1.1: <short imperative description>
 
 **Acceptance criteria** (each must be objectively checkable):
 
-- [ ] <criterion — phrased so a script or a reviewer can say yes/no>
+- [ ] <criterion, phrased so a script or a reviewer can say yes/no>
 - [ ] <criterion>
 
 **Evidence to submit** (artifacts a gate will check, not claims):
@@ -44,12 +44,13 @@ Each task is small enough to generate, validate, and commit on its own. Every ta
 - `test_output` (artifact): test run showing `<named test that proves the criterion>`
 - `<field>` (<type>): <what it must satisfy, e.g. `max_retries <= 10`>
 
-**Gate:** the acceptance schema for this task is **withheld** from the generating agent.
-See [`../gates/`](../gates/) for a runnable gate.
+**Gate:** the acceptance criteria above are public (the agent works from them). An
+**independent** gate validates the submitted evidence: the agent cannot run it, edit it, or
+pass it by assertion. See [`../gates/`](../gates/) for a runnable gate.
 
 ---
 
-### Task 1.2 — <short imperative description>
+### Task 1.2: <short imperative description>
 
 **Acceptance criteria:**
 
@@ -59,7 +60,7 @@ See [`../gates/`](../gates/) for a runnable gate.
 
 - `<field>` (<type>): <constraint>
 
-**Gate:** withheld schema; validated after submission.
+**Gate:** independent checker; evidence validated after submission, out of the agent's reach.
 
 ---
 

@@ -1,4 +1,4 @@
-# LaTeX build artifacts — the canonical PDF is committed at ../docs/
+# LaTeX build artifacts; the canonical PDF is committed at ../docs/
 build/
 *.pdf
 *.aux

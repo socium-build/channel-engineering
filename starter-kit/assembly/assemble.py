@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mode-aware context assembly — a sketch.
+"""Mode-aware context assembly: a sketch.
 
 Same materials, two assembly orders, because attention is not uniform across the
 context window. The goal must sit where attention is highest *for the mode of the work*:
@@ -8,7 +8,7 @@ context window. The goal must sit where attention is highest *for the mode of th
     autonomous     -> pin the goal at the END, after the pile of intermediate results
                       that would otherwise bury it in the low-attention middle
 
-Zero dependencies — Python 3.8+ standard library only. Read it; it's the point.
+Zero dependencies; Python 3.8+ standard library only. Read it; it's the point.
 """
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ def assemble(mode: str, system: str, corpus: list[str], history: list[str], goal
         # A human is present; the recent tail is the authoritative intent.
         return [system, *corpus, *history]
     if mode == "autonomous":
-        # No human; re-pin the goal where attention is highest — at the very end.
+        # No human; re-pin the goal where attention is highest, at the very end.
         return [system, *corpus, *history, f"CURRENT GOAL (do not lose): {goal}"]
     raise ValueError(f"unknown mode: {mode!r}")
 

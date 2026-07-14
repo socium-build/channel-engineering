@@ -1,4 +1,4 @@
-# Engineering the Channel — LaTeX Source
+# Engineering the Channel: LaTeX Source
 
 **"Engineering the Channel: Restoring Software Engineering Discipline in the Age of LLMs"**
 Josh Paul · Socium · July 2026
@@ -29,7 +29,7 @@ The committed, published PDF lives one level up at
 [`../docs/engineering-the-channel.pdf`](../docs/engineering-the-channel.pdf);
 `build.sh` regenerates and syncs it.
 
-> **Note:** All figures are drawn natively in `main.tex` — there are no
+> **Note:** All figures are drawn natively in `main.tex`; there are no
 > external figure files to manage. Figures 1, 2, and 4 are TikZ diagrams
 > (the Channel Engineering Architecture, the context-winnowing funnel, and
 > the partnership network), and Figure 3 (the Four-Layer Thesis Stack) is a
@@ -39,9 +39,9 @@ The committed, published PDF lives one level up at
 
 > **In-text exhibits:** §10 includes a worked-example callout ("A Single Task,
 > Traced") built with an `mdframed` box, and each of the nine Practical Principles
-> (§9) carries a one-line operational `TEST` rendered by the `\principletest` macro
+> (§11) carries a one-line operational `TEST` rendered by the `\principletest` macro
 > (defined near the pull-quote macro in the preamble). Both rely only on the
-> already-loaded `mdframed` package and the default monospace font — no new
+> already-loaded `mdframed` package and the default monospace font, with no new
 > dependencies.
 
 ---
@@ -71,7 +71,7 @@ runs two passes for cross-references, and then syncs the resulting PDF to:
   repo is checked out as a sibling under `…/socium-build/website` (otherwise it
   skips that copy).
 
-Output: 31 pages.
+Output: 37 pages (numbered sections; position paper + research agenda framing).
 
 ### Build (manual)
 
@@ -80,7 +80,7 @@ xelatex -interaction=nonstopmode main.tex
 xelatex -interaction=nonstopmode main.tex   # run twice for cross-references
 ```
 
-> No `pip`/Python/matplotlib step is required — the figures are TikZ code
+> No `pip`/Python/matplotlib step is required; the figures are TikZ code
 > compiled directly by XeLaTeX. The `tikz` and `pgfplots` packages (both
 > loaded in the preamble) ship with any full TeX Live install (or
 > `tlmgr install pgf pgfplots`).
@@ -101,7 +101,7 @@ named LaTeX colors `indigo`, `cyan`, and `midb` (see below).
 
 The `fonts/` directory contains both typefaces (Source Serif 4 for body text,
 Inter for headings and labels). All font families in `main.tex` are loaded with
-a relative `Path = fonts/`, so the source is self-contained — no system font
+a relative `Path = fonts/`, so the source is self-contained; no system font
 installation is required on any platform. Use `./build.sh` (which compiles from
 this directory automatically) and the relative paths always resolve; if you run
 `xelatex` by hand, do so from this `paper/` directory for the same reason.

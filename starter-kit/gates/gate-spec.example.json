@@ -1,5 +1,5 @@
 {
-  "_comment": "This is the WITHHELD schema. It lives where the generating agent's context never loads it. The agent is told only to submit an evidence file plus artifacts; it never sees these criteria.",
+  "_comment": "The checker's copy of the acceptance criteria. These criteria are public: they live in the approved spec the agent works from. What the agent cannot do is run this checker, edit it, or self-attest past it. It submits an evidence file plus artifacts; the gate validates that submission after the fact.",
   "required": [
     {
       "field": "test_output",

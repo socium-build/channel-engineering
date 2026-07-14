@@ -8,5 +8,5 @@
 - Retries **MUST NOT** mask failures of non-idempotent operations.
 
 *Origin: decision [`bounded-retry-policy`](../decisions/2026-06-24-bounded-retry-policy.md)
-(2026-06-24). When this standard changes, add a new decision record — do not silently edit the
+(2026-06-24). When this standard changes, add a new decision record; do not silently edit the
 rule's history.*
