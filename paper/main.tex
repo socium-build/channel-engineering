@@ -259,65 +259,54 @@ Restoring Software Engineering Discipline in the Age of LLMs}
 % ============================================================
 \section*{Abstract}
 
-Large language models have upended the economics of software production.
-Code, documentation, and test suites that once took days of engineering labor can now be
-drafted in minutes.
-Yet reliability has not kept pace with capability: studies report that the large majority
-of organizations deploying LLMs encounter major production failures, that developers can
-be measurably slower on real tasks, and that practitioner trust in the output is falling
-even as the models improve. This paper argues that capability and reliability are
-\emph{complements}, and that the field has invested almost everything in the former while
-leaving the latter under-engineered. The locus of the gap is the \textbf{channel} between
-human and AI: the full communication system that carries intent into the model and
-carries work back out, of which the context window is only a part. We propose \textbf{channel engineering}
-as the discipline required to close this gap: a systematic approach to structuring that
-communication system, drawing on Shannon and Weaver's levels of communication and on
-established practices from high-reliability software domains.
+A model does not make software reliable. The system engineered around it does.
+
+Large language models have upended the economics of software production. Code,
+documentation, and tests that once took days can now be drafted in minutes. Reliability
+has not followed. The majority of organizations deploying LLMs report major production
+failures, experienced developers can be measurably slower on real tasks, and practitioner
+trust is falling even as the models improve. Capability and reliability are not the same
+axis, and the field has spent almost everything on the first. This paper argues they are
+\emph{complements}, and that reliability lives in the half left under-engineered: the
+\textbf{channel} between human and AI, the full communication system that carries intent
+into the model and work back out. The context window is only a part of it.
 
 The industry has converged on \emph{context engineering}: curating the tokens a model
-sees. Channel engineering goes further. Weaver's analysis separates the technical problem
-of moving symbols (the context window as medium, subject to the U-shaped attention curve
-and context rot) from the semantic problem of conveying intended meaning and the
-effectiveness problem of producing the intended outcome. The semantic and effectiveness
-levels, where reliability is lost, are the levels token curation alone cannot reach, and
-the levels the field's evidence has not yet measured directly. We argue the difference is
-ownership: you cannot engineer a channel you do not own. Effective channel engineering
-requires control of the whole agent loop (assembly, budget, and retention); a context
-window treated as a sliding attention viewport over a durable record, rather than as a
-buffer the work must be compressed to fit; deterministic, extractive memory;
-independent, tamper-resistant validation gates; mode-dependent context assembly; and
-re-grounding at every step,
-because per-step reliability compounds across the many steps of agentic work.
+sees. \textbf{Channel engineering} goes further. Following Shannon and Weaver, it
+separates the technical problem of moving symbols from the semantic problem of conveying
+meaning and the effectiveness problem of producing the intended outcome. Reliability is
+lost at the semantic and effectiveness levels, and token curation cannot reach them. The
+difference is ownership: you cannot engineer a channel you do not own. Owning the loop is
+what makes the rest possible. Treat the context window as a sliding attention viewport
+over a durable record, not a buffer the work is compressed to fit. Keep memory
+deterministic and extractive. Gate output through independent, tamper-resistant
+validation. Assemble context by mode. Re-ground at every step, because per-step
+reliability compounds across the many steps of agentic work.
 
-We trace the historical roots of software reliability engineering in aerospace
-(DO-178C), medical devices (IEC 62304), and formal methods (Meyer, Jackson,
-Lamport), and argue that these disciplines solved the same problem for human programmers
-that channel engineering solves for LLMs. The gap is not new; it is the same gap that
-separates ad hoc programming from engineering. What is new is that LLMs make the
-discipline economically viable for mainstream software development for the first time.
+None of this is new. Aerospace (DO-178C), medical devices (IEC 62304), and formal methods
+(Meyer, Jackson, Lamport) solved the same problem for human programmers that channel
+engineering solves for LLMs. The gap between ad hoc programming and engineering is the gap
+here. What is new is cost: LLMs make the discipline economically viable for mainstream
+software for the first time.
 
-The paper also introduces the \textbf{Socium model}, an application of channel engineering
-to human-AI collaboration, in which the partnership is treated as a distributed system, the
-context window is treated as a communication channel, and the accumulated decisions and
-artifacts of the work are treated as a shared corpus of durable intelligence.
-This paper is a position paper and a research agenda: a synthesis that assembles
-converging work into a connected argument, takes falsifiable positions the field can
-test, names a gap, the semantic and effectiveness levels, that current evidence does not
-yet measure directly, and specifies the experiments that would test its distinctive
-claims. We conclude with a set of practical
-principles for channel engineering and a call for the field to treat LLM reliability as
-an engineering problem to be solved alongside model improvement, not downstream of it.
+The paper introduces the \textbf{Socium model}, channel engineering applied to human-AI
+collaboration. The partnership is treated as a distributed system, the context window as a
+communication channel, the accumulated decisions and artifacts as a shared corpus of
+durable intelligence. This is a position paper and a research agenda. It assembles
+converging work into one argument, takes positions the field can falsify, names a gap
+current evidence does not yet measure, and specifies the experiments that would test its
+claims. It asks the field to treat LLM reliability as an engineering problem, solved
+alongside model improvement rather than downstream of it.
 
 % ============================================================
 %  SECTION 1
 % ============================================================
 \section{The Reliability Problem That Doesn't Go Away}
 
-Engineers who adopted large language models early encountered a consistent and
-frustrating pattern: the models were capable of producing excellent output in isolation,
-but unreliable in production. The code would work for one case and fail for another. The
-documentation would be accurate in one section and hallucinatory in the next. The test
-suite would pass today and fail tomorrow on the same codebase.
+Engineers who adopted large language models early encountered a consistent pattern: the
+models produced excellent output in isolation and proved unreliable in production. Code
+that works for one case fails on the next. A test suite passes today and fails tomorrow on
+the same codebase, same prompt.
 
 The field's default response has been to wait for better models.\footnote{Rarely
 advanced as an explicit thesis, this is the implicit premise of capability-first investment
@@ -346,9 +335,9 @@ them.\footnote{S.~Rabanser, S.~Kapoor, A.~Narayanan, et al., \href{https://arxiv
 
 This is not evidence that capability is irrelevant. Better models do produce better
 output, and a sufficiently capable model would paper over many channel defects.
-The claim of this paper is narrower, and harder to dismiss: capability and the channel
+The claim here is narrower: capability and the channel
 are \emph{complements}, and the field has poured almost all of its visible investment into
-the former while leaving the latter under-engineered. If this is right, reliability lives
+capability and left the channel under-engineered. If this is right, reliability lives
 disproportionately in the half the field has barely begun to build. The beginning is
 real: the research literature has lately given that half a name, the \emph{harness}, and
 begun surveying it as an engineering discipline and measuring it as an economic
@@ -359,11 +348,10 @@ self-improving systems; a thirty-three-author industry study,
 \href{https://arxiv.org/abs/2607.06906}{`The Harness Effect'}, arXiv:2607.06906, 2026,
 reports that on its enterprise workload, orchestration design cut blended cost per task
 by more than switching between the cheapest and most expensive model did (41\% against
-36\%, with per-model gains of 33--61\%). Section~12 takes up the relationship.} A name, though, is not yet a practice.
+36\%, with per-model gains of 33--61\%). Section~11 takes up the relationship.} A name, though, is not yet a practice.
 
-The reliability problem in LLM-assisted development mirrors, almost exactly, the
-reliability problem that motivated the development of software engineering as a discipline
-in the first place. The NATO Software Engineering conferences of 1968 and 1969 were
+The reliability problem in LLM-assisted development mirrors the one that created
+software engineering as a discipline. The NATO Software Engineering conferences of 1968 and 1969 were
 convened in response to what was then called the `software crisis': programs that worked
 for their authors failed in the hands of others, systems that performed correctly in
 testing failed in deployment, codebases that were maintainable by their original authors
@@ -372,21 +360,14 @@ record: P.~Naur and B.~Randell (eds.), \href{http://homepages.cs.ncl.ac.uk/brian
 B.~Randell and J.~N.~Buxton (eds.), \textit{Software Engineering Techniques} (Rome, 1969;
 NATO Science Committee, 1970). The term `software crisis' enters wide use through them.}
 
-The solutions that emerged---structured programming, formal specification, rigorous
-testing, version control, code review---were not solutions to a capability problem. The
-engineers of 1968 had skill in abundance. What they lacked was the engineering
-discipline that transforms individual skill into reliable systems.
+The solutions that emerged were not answers to a capability problem: structured
+programming, formal specification, rigorous testing, version control, code review. The
+engineers of 1968 had skill in abundance. What they lacked was the engineering discipline
+that transforms individual skill into reliable systems.
 
-This paper argues that LLM-assisted development is in the same position as
-pre-discipline software development: engineers with significant capability operating
-without the structural practices that make capability reliable. The solution is not to
-wait for better models. It is to build the engineering discipline that the medium
-requires.
-
-The argument that follows runs from diagnosis to remedy: first, that reliability is lost
-in the channel; then, that the disciplines which would recover it are old and have only
-now become affordable; and finally, a set of practical principles for engineering the
-channel one owns.
+LLM-assisted development sits where pre-discipline software sat: real capability, no
+structural practice to make it reliable. The solution is not to wait for better models. It
+is to build the discipline the medium requires.
 
 
 % ============================================================
@@ -399,10 +380,10 @@ carefully. Shannon's 1948 theory deliberately set meaning aside: it modeled the 
 transmission of symbols through a noisy medium and declared the semantic content of those
 symbols irrelevant to the engineering
 problem.\footnote{C.~E. Shannon, \href{https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf}{`A Mathematical Theory of Communication'}, 1948.}
-That is precisely the half of the problem that scale has been quietly solving. The half
-that remains is the half Shannon excluded.
+That is the half scale has been solving. The half that remains is the one Shannon set
+aside.
 
-It was Warren Weaver, in his companion essay to Shannon's theory, who named the full
+Warren Weaver, in his companion essay to Shannon's theory, named the full
 structure.\footnote{C.~E. Shannon and W. Weaver, \href{https://archive.org/details/mathematicaltheo00shan}{\textit{The Mathematical Theory of Communication}}, 1949.}
 Weaver distinguished three levels of communication problem. \textbf{Level A}, the
 \emph{technical} problem: how accurately can the symbols be transmitted? \textbf{Level
@@ -431,21 +412,19 @@ retransmission), and the \emph{decoding} (how the model's output is checked back
 intent). Engineering only the medium, packing the window well, addresses mostly Weaver's
 technical level and stops there.
 
-This sense of `channel' should be distinguished from a parallel line of work that models
-the language model \emph{itself} as a noisy channel and asks after its
-information-theoretic capacity.\footnote{For the model-as-channel view see, e.g.,
+A parallel line of work models the language model \emph{itself} as a noisy channel and
+asks after its information-theoretic capacity.\footnote{For the model-as-channel view see, e.g.,
 \href{https://arxiv.org/abs/2605.23901}{`LLMs as Noisy Channels: A Shannon Perspective on
 Model Capacity and Scaling Laws'}, arXiv:2605.23901, 2026, and the agent-as-channel
 formalization in \href{https://arxiv.org/abs/2605.09121}{`A Communication-Theoretic
 Framework for LLM Agents'}, arXiv:2605.09121, 2026.} That work concerns the medium and the
 model; the channel this paper engineers is the managed interaction \emph{around}
-them (encoding, shared code, feedback, and retention), which is precisely where Weaver's
-semantic and effectiveness problems live. A separate and more recent formal literature is
-beginning to formalize the same intuition: modeling the audience and context as a channel
-with a finite \emph{capacity for meaning}, it finds that even perfectly engineered prompts
-cannot exceed it, and that vocabulary mismatch imposes an irreducible fidelity limit even
-over a noiseless carrier: an independent, mathematical restatement of the claim that
-reliability is lost at Levels~B and C.\footnote{\href{https://arxiv.org/abs/2511.19550}{`The
+them (encoding, shared code, feedback, and retention), where Weaver's
+semantic and effectiveness problems live. Recent formal work restates this mathematically. It models audience and context as a
+channel with a finite \emph{capacity for meaning}, and finds that even perfectly engineered
+prompts cannot exceed that capacity: vocabulary mismatch imposes an irreducible fidelity
+limit. This is an independent derivation of the claim that reliability is lost at Levels~B
+and C.\footnote{\href{https://arxiv.org/abs/2511.19550}{`The
 Semiotic Channel Principle: Measuring the Capacity for Meaning in LLM Communication'},
 arXiv:2511.19550, 2025; and a related framework integrating Shannon, Weaver, and formal
 proof systems (arXiv:2604.16471, 2026), which identifies a `semantic bottleneck' arising
@@ -504,20 +483,15 @@ a channel is to control its encoding, its assembly, its feedback, and its retent
 controls belong to whoever owns the loop in which the model runs: the process that
 decides what enters the window, in what order, under what budget, and what becomes of the
 output. A tool that injects context into a window owned by some other agent can
-\emph{influence} the channel; it cannot \emph{engineer} it. The full control
-surface (assembly order, budget enforcement, the position of the critical constraint,
-deterministic retention of the corpus) is available only to the owner of the loop. This
-is why channel engineering is finally an architectural claim: the discipline begins at
-the moment one takes ownership of the loop.
+\emph{influence} the channel; it cannot \emph{engineer} it. This is why channel
+engineering is finally an architectural claim: the discipline begins the moment one takes
+ownership of the loop.
 
 \subsection{What Engineering the Channel Means}
 
 Channel engineering is the practice of deliberately constructing the information
-environment in which an LLM operates. It includes: structuring specifications so that the
-most relevant constraints are proximate to the generation request; maintaining a retrieval
-layer that surfaces relevant prior decisions at the moment of generation; building
-validation gates that catch channel failures before they propagate into the codebase; and
-maintaining an audit trail that makes the history of decisions navigable and recoverable.
+environment in which an LLM operates. Section~4 states the operational principles as one
+compounding process; the sections that follow develop the mechanisms they rely on.
 
 \begin{figure}[htbp]
   \centering
@@ -566,8 +540,7 @@ maintaining an audit trail that makes the history of decisions navigable and rec
     \draw[{Stealth[length=4pt]}-{Stealth[length=4pt]}, line width=0.9pt, muted]
           (5.0,1.2) -- (5.0,1.05);
   \end{tikzpicture}
-  \caption{The Channel Engineering Architecture. Intelligence is not in either
-  participant; it is in the channel and the accumulated corpus.}
+  \caption{The Channel Engineering Architecture.}
   \label{fig:channel}
 \end{figure}
 
@@ -578,9 +551,8 @@ maintaining an audit trail that makes the history of decisions navigable and rec
 \section{Externalizing Executive Control}
 
 If the lossy medium is one structural source of unreliability, the process that consumes
-it is the other. The context window loses information; the model traversing it is, in a
-precise and useful sense, short-sighted. A useful vocabulary for this second failure comes
-from an unexpected quarter: clinical neuropsychology.
+it is the other. The context window loses information; the model traversing it is
+short-sighted. The vocabulary for this second failure comes from clinical neuropsychology.
 
 In 1997, the clinical psychologist Russell Barkley reframed ADHD. The disorder, he argued,
 is not fundamentally a deficit of attention; it is a deficit of \emph{behavioral
@@ -597,7 +569,7 @@ diagnosis: you do not remediate an executive-function deficit by exhorting great
 you engineer the environment to supply the functions the person cannot reliably supply
 internally.
 
-Observed across long-horizon tasks, LLM behavior fits the pattern closely, and the
+Across long-horizon tasks, LLM behavior fits the pattern. The
 parallel is functional: the behaviors match, even if the mechanisms differ. \textbf{Working memory:}
 models drift from their original requirements over a long task, repeating work or solving
 a subtly different problem than the one specified; the goal state degrades just as the
@@ -631,14 +603,14 @@ The design stance does not depend on where that ceiling lies: external structure
 augments whatever executive capacity the model has, and stabilizes it where it is
 weakest.
 
-This is the same conclusion the communication analysis reached, arrived at from the other
+The communication analysis reached the same conclusion from the other
 direction. A lossy channel and a short-sighted process both demand an external structure
 that holds the goal, enforces the sequence, and makes the shortcut harder than the work.
 That structure is the design brief for everything that follows: a durable corpus and
 re-grounding stand in for the working memory the model cannot maintain; ordered,
 gated execution supplies the temporal regulation it lacks; and independent validation
-supplies the inhibition it cannot supply itself. Channel engineering is, in this second
-light, executive function externalized.
+supplies the inhibition it cannot supply itself. Channel engineering is executive
+function externalized.
 
 
 % ============================================================
@@ -687,8 +659,8 @@ treatment of a full context window is to compress the history: to summarize the 
 itself so that it fits the medium. That is the one move transport engineering never
 makes; no engineer has proposed lossily summarizing a file because the maximum
 transmission unit is small. Transport's answer to a bounded window was not a smaller
-message; it was durability at the endpoints, sequencing, and a window that slides. And
-consider the ratios involved: a terabyte over 1,500-byte frames is a mismatch of a
+message; it was durability at the endpoints, sequencing, and a window that slides. Consider
+the ratios: a terabyte over 1,500-byte frames is a mismatch of a
 billion to one, solved and boring; a long project over a modern context window is a
 mismatch of a few hundred to one, treated as a crisis. The crisis was never the ratio.
 It is the missing layer.
@@ -709,15 +681,15 @@ step chooses, at every step, what sits where attention is highest. Under a slidi
 window, the medium's two measured pathologies stop being weather and become parameters.
 
 The scale at which this matters is the scale at which real work is delivered. A feature
-is not a generation; it is hundreds of dependent steps across sessions that may span
-days, and the record of the work outgrows any window early (often within the first
-session) and keeps growing until the outcome ships. Under the buffer model, that
+is not a generation. It is hundreds of dependent steps across sessions that may span
+days. The record of the work outgrows any window early, often within the first
+session, and keeps growing until the outcome ships. Under the buffer model, that
 growth is a problem to be beaten back with larger windows and lossier summaries. Under
 the viewport it is the normal case the architecture assumes: the unit of delivery is
 larger than the unit of attention, and the window's job is to keep each step well-aimed
 while the record carries the whole.
 
-The position is argued, not yet tested, and it is falsifiable: on long-horizon work, a
+The position is argued, not tested, and falsifiable: on long-horizon work, a
 bounded window re-projected from a complete record should outperform both a
 monotonically growing window and generative compaction of history, at equal model
 capability and with retrieval quality held constant across arms. The claim presumes an
@@ -726,17 +698,17 @@ adequate selection function, not a perfect one.
 Two boundaries must be drawn honestly. The first is the one place transport does not
 transfer: the position of the window. TCP slides forward over contiguous bytes, where
 the next span is simply the next span. The next projection of a working record is
-nothing of the kind. The working set for a step is non-contiguous by nature (this
-decision, that distant constraint, a scattered handful of code), and choosing it is a
+nothing of the kind. The working set for a step is non-contiguous by nature: this
+decision, that distant constraint, a scattered handful of code. Choosing it is a
 content-addressed judgment whose wrong answer is a wrong output. Selection is not
 sliding. Section~7 names that problem (retrieval by causal relevance rather than surface
-similarity) and leaves it honestly unsolved; it is the weight the rest of the discipline
+similarity) and leaves it honestly unsolved. It is the weight the rest of the discipline
 carries. Nor does the discipline carry it by retrieval alone. Decomposition carries most
-of it: a specification broken into tasks with checkable acceptance criteria pre-computes
-the bulk of each step's working set, because a well-formed task names what it needs (its
-criteria, its constraints, the standards it invokes). What remains for retrieval is the
+of it. A specification broken into tasks with checkable acceptance criteria pre-computes
+the bulk of each step's working set, because a well-formed task names what it needs: its
+criteria, its constraints, the standards it invokes. What remains for retrieval is the
 long tail: the relevant prior decision, the conflict from two months back. Selection
-stays unsolved in general; the disciplined move is to arrange the work so the general
+stays unsolved in general. The disciplined move is to arrange the work so the general
 problem is rarely faced in full. The second boundary is Weaver's. The transport catalog secures Level~A: it
 makes the medium dependable; it cannot make the meaning right. Everything after this
 section exists because Levels~B and~C remain: gates, specifications, and the corpus
@@ -745,7 +717,9 @@ fight for meaning above a medium the sliding window has made trustworthy.
 \pullquote{Context engineering packs a buffer. Channel engineering slides a viewport
 over a record it never rewrites to fit, and owns the loop that slides it.}
 
-Five commitments follow from this single move.
+Seven commitments follow, and they compound. Owning the loop is the precondition; the
+rest are the disciplines it unlocks. One of them, updating the corpus on every validated
+decision, is what makes the process feed itself.
 
 \subsection*{1.~Own the loop, do not plug into one}
 
@@ -760,13 +734,15 @@ it independently, making \emph{own your context window} and \emph{own your contr
 two of its load-bearing factors.\footnote{D.~Horthy / HumanLayer,
 \href{https://github.com/humanlayer/12-factor-agents}{`12-Factor Agents'}, 2025.}
 From the research side, Weng's survey of \emph{harness engineering} names the same layer
-and treats it as no less decisive than the model itself; Section~12 takes up the
+and treats it as no less decisive than the model itself; Section~11 takes up the
 relationship.\footnote{L.~Weng,
 \href{https://lilianweng.github.io/posts/2026-07-04-harness/}{`Harness Engineering for
 Self-Improvement'}, Lil'Log, July 2026.}
 The viewport makes the requirement concrete: a tool that injects context into another
 agent's window can pack it; only the owner of the loop can slide it.
 Architecture is what separates acceleration from instability.
+
+\principletest{If you cannot change assembly order, budget, or retention without another vendor's permission, you do not own the loop; you are a guest in it.}
 
 \subsection*{2.~Keep durable memory deterministic}
 
@@ -792,7 +768,31 @@ Context Files Helpful for Coding Agents?'}, arXiv:2602.11988, 2026. The study me
 generated context files, not generative compaction of conversation history; the two are
 related but distinct mechanisms.} The position is argued, not yet tested.
 
-\subsection*{3.~Make validation independent and tamper-resistant}
+\principletest{If condensation can produce a sentence no source ever wrote, every future retrieval can inherit the invention.}
+
+\subsection*{3.~Specify before you generate}
+
+Every significant generation is preceded by a specification: a structured statement of what
+the output must do, what constraints it must satisfy, and how it will be validated. The
+specification narrows the output distribution before generation begins, and it narrows the
+selection problem too, because a task with checkable criteria names most of its own working
+set.
+
+\principletest{If you cannot state how the output will be checked before you generate it, you have a prompt, not a specification.}
+
+\subsection*{4.~Assemble by mode}
+
+The channel is not one channel. When a human is in the loop, the conversational tail is
+the authoritative statement of intent and recency-forward assembly is correct. When the
+human is absent and the model is executing autonomously, the opposite holds: intent must
+be \emph{structurally re-presented}, pinned and placed where attention is highest, so
+that the goal cannot age out beneath a pile of intermediate results. Uniform context
+management ignores this; the position effects documented above make it decisive. Mode
+selects the positioning policy for the viewport.
+
+\principletest{At step~20 of an unattended run, check whether the goal still sits where attention is highest. If intermediate results have displaced it, your assembly was designed for a conversation that is not happening.}
+
+\subsection*{5.~Gate independently before commit}
 
 The requirements a work item must satisfy belong in the open; they are the
 specification. What must stay independent is the verification itself: the gate's
@@ -815,22 +815,25 @@ with the surrounding project context: ``almost right'' is, concretely, fluent an
 code that diverges from intent or repository reality.} The gate is the viewport
 doctrine's feedback path; Section~8 takes up its mechanics.
 
-\subsection*{4.~Assemble by mode}
+\principletest{If an agent that could read the gate's test harness could still pass without doing the work, it is a rubric, not a gate.}
 
-The channel is not one channel. When a human is in the loop, the conversational tail is
-the authoritative statement of intent and recency-forward assembly is correct. When the
-human is absent and the model is executing autonomously, the opposite holds: intent must
-be \emph{structurally re-presented}, pinned and placed where attention is highest, so
-that the goal cannot age out beneath a pile of intermediate results. Uniform context
-management ignores this; the position effects documented above make it decisive. Mode
-selects the positioning policy for the viewport.
+\subsection*{6.~Update the corpus on every validated decision}
 
-\subsection*{5.~Re-ground at every step}
+Every decision that passes a gate is written back into the corpus. This is the step that
+makes the process compound: the record grows through the work, and each validated decision
+sharpens every retrieval that follows. A decision that is not captured is lost, and its
+absence degrades every later generation.
+
+\principletest{Ask where last week's validated decision lives. If the only answer is ``the chat history,'' it is already lost to every future retrieval.}
+
+\subsection*{7.~Re-ground at every step}
 
 Because per-step errors compound (Section~7), reliability must be re-secured at each
 step, through retrieval that re-anchors the model in project truth and gates that
 re-check its output. Re-grounding is the re-projection itself; the compounding
 arithmetic sets its cadence.
+
+\principletest{Count the steps between two retrievals of project truth. Every step in that gap is one where the model trusts window residue and error compounds unchecked.}
 
 
 % ============================================================
@@ -1461,105 +1464,6 @@ record join the durable corpus, retrievable months later by a fresh, stateless s
 that never saw this task.
 }
 \end{mdframed}
-
-% ============================================================
-%  SECTION 11
-% ============================================================
-\section{Practical Principles for Channel Engineering}
-
-The following principles are intended as a practical guide for engineers and teams
-seeking to apply channel engineering in their own development processes. They distill
-the thesis into actionable guidance; a complete methodology would take more than a paper.
-
-\subsection*{1.~Own the loop you intend to engineer}
-
-The controls that make the channel reliable (assembly order, budget enforcement,
-constraint placement, deterministic retention) belong to whoever owns the agent loop.
-Build (or adopt) a substrate that gives you those controls. A configuration layered on
-top of an agent you do not control can influence the channel but cannot engineer it.
-
-\principletest{If you cannot change assembly order, budget, or retention without another vendor's permission, you do not own the loop; you are a guest in it.}
-
-\subsection*{2.~Treat the context window as a communication channel}
-
-Design your prompts and retrieval systems with the same attention to signal-to-noise
-ratio that you would bring to any communication engineering problem. Every token in the
-context window should be earning its place by narrowing the output distribution toward
-the desired output.
-
-\principletest{Point at any token in the window and name what it narrows. If you cannot, it is noise you are spending attention budget to carry.}
-
-\subsection*{3.~Maintain a structured, deterministic corpus}
-
-The accumulated work of the project should be organized as a retrievable artifact, not
-scattered across files, chat histories, and tickets. The corpus is the project's memory;
-it should be as deliberately maintained as the codebase, and it should be
-\emph{deterministic and auditable}. The corpus itself is never condensed to fit the
-window: the record accumulates, and the window carries only each step's projection of it
-(Section~4). Where a projection must be condensed, prefer extraction (selecting verbatim
-content with its provenance) over generative summary: a summary that hallucinates poisons
-every future retrieval, while extraction can only omit, never invent.
-
-\principletest{If condensation can produce a sentence no source ever wrote, every future retrieval can inherit the invention.}
-
-\subsection*{4.~Write specifications before generating}
-
-Every significant generation task should be preceded by a specification: a structured
-description of what the output should do, what constraints it should satisfy, and how it
-will be validated. The specification is the instrument that narrows the output
-distribution before generation begins. It narrows the selection problem for the same
-reason: a task with checkable criteria names most of its own working set.
-
-\principletest{If you cannot state how the output will be checked before you generate it, you have a prompt, not a specification.}
-
-\subsection*{5.~Place independent validation gates before commits}
-
-Every generated artifact should pass through a validation gate before it is committed to
-the codebase. The gate may be a human review, an automated test suite, a static analyzer,
-or a combination. The key property is that it is explicit: intent and output are compared
-at a formal checkpoint. Where the generator is itself an LLM, the requirements belong in
-the specification and the verification belongs out of the generator's hands: the gate
-validates submitted evidence after the fact, with its implementation and held-out checks
-independent; otherwise the model optimizes to pass the test rather than to do the work.
-
-\principletest{If an agent that could read the gate's test harness could still pass without doing the work, it is a rubric, not a gate.}
-
-\subsection*{6.~Update the corpus on every validated decision}
-
-Every decision that passes through a validation gate should be incorporated into the
-corpus. The corpus grows through the work; decisions that are not captured are lost, and
-their absence degrades the quality of future generations.
-
-\principletest{Ask where last week's validated decision lives. If the only answer is ``the chat history,'' it is already lost to every future retrieval.}
-
-\subsection*{7.~Assemble context for the mode of the work}
-
-Distinguish human-in-the-loop work from autonomous execution. When a human is present,
-let the conversational tail carry intent. When the model runs unattended, pin the goal
-and re-present it where attention is highest, so it cannot age out beneath intermediate
-results. Assembly is viewport positioning, and the mode chooses the policy. One assembly
-strategy does not serve both.
-
-\principletest{At step~20 of an unattended run, check whether the goal still sits where attention is highest. If intermediate results have displaced it, your assembly was designed for a conversation that is not happening.}
-
-\subsection*{8.~Re-ground at every step}
-
-Because errors compound across a chain of steps, reliability cannot be secured once at
-the prompt. Re-anchor the model in project truth through retrieval, and re-check its
-output through gates, at every step. The channel is engineered continuously, not
-configured once.
-
-\principletest{Count the steps between two retrievals of project truth. Every step in that gap is one where the model trusts window residue and error compounds unchecked.}
-
-\subsection*{9.~Treat reliability as an engineering problem, not a model problem}
-
-When a generation fails and the output does not match the intent, diagnose the
-channel before you blame the model. Ask what context was missing, what specification was
-ambiguous, what validation gate failed to catch the error. The model is a component; the
-channel is the system.
-
-\principletest{When a generation fails, if your first move is to swap the model rather than ask what context was missing or what gate let it through, you are treating a system defect as a component defect.}
-
 
 % ============================================================
 %  SECTION 12  (Related Work)

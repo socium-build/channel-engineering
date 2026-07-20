@@ -36,46 +36,16 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# ── Web render sync gate (see header: sync rule) ────────────
-# Heuristic: file mtimes on the working tree, honest for a single
-# maintainer on one machine ("which did I edit last"), cheap, and free of
-# git-state edge cases (paper.astro may be uncommitted while being written).
-mtime() { stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null; }
-
-WEBSITE_DIR="$SCRIPT_DIR/../../website"
-WEB_RENDERS=(
-  "$WEBSITE_DIR/src/pages/paper.astro"
-  "$WEBSITE_DIR/public/llms-full.txt"
-)
-if [ -d "$WEBSITE_DIR" ]; then
-  TEX_T="$(mtime "$SCRIPT_DIR/main.tex")"
-  for render in "${WEB_RENDERS[@]}"; do
-    if [ ! -f "$render" ]; then
-      echo "error: website checkout found but $(basename "$render") is missing." >&2
-      echo "       The web renders are published surfaces; restore $render" >&2
-      echo "       or pass --allow-stale-web." >&2
-      [ "$ALLOW_STALE_WEB" -eq 1 ] || exit 1
-      continue
-    fi
-    WEB_T="$(mtime "$render")"
-    if [ "$TEX_T" -gt "$WEB_T" ]; then
-      if [ "$ALLOW_STALE_WEB" -eq 1 ]; then
-        echo "==> WARNING: main.tex is newer than $(basename "$render") (override accepted)."
-      else
-        echo "" >&2
-        echo "error: main.tex is newer than the web render $(basename "$render")." >&2
-        echo "       main.tex is the sole source of truth; apply the same revision to" >&2
-        echo "       $render" >&2
-        echo "       in the same change, then rebuild. To build anyway (mid-draft" >&2
-        echo "       iteration), pass --allow-stale-web explicitly." >&2
-        exit 1
-      fi
-    else
-      echo "==> web render sync: $(basename "$render") is current (or newer), ok"
-    fi
-  done
+# ── Regenerate the web renders from main.tex (single source of truth) ──
+# render.py DERIVES public/llms-full.txt and src/pages/paper.astro from main.tex,
+# so the published renders can no longer drift from the paper. This replaces the
+# old mtime "sync gate": there is nothing to keep in sync by hand any more. The
+# --allow-stale-web flag is now accepted for backward compatibility but is a no-op.
+if command -v python3 >/dev/null 2>&1; then
+  echo "==> render.py: regenerating web renders from main.tex"
+  python3 "$SCRIPT_DIR/render.py" --write
 else
-  echo "==> website repo not checked out alongside; web sync gate skipped"
+  echo "==> WARNING: python3 not found; web renders NOT regenerated (may be stale)" >&2
 fi
 
 # ── Locate xelatex ──────────────────────────────────────────
