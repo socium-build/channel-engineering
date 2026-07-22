@@ -9,7 +9,8 @@ not the model) lives in the companion paper, *Engineering the Channel*
 want the evidence behind a claim here.
 
 > **Status: first complete draft.** All controls are worked in full; the starter kit covers
-> specs, gates, corpus, and assembly and runs out of the box. Feedback welcome.
+> specs, gates, ingestion, authority, corpus, and assembly, and runs out of the box.
+> Feedback welcome.
 
 ---
 
@@ -171,7 +172,9 @@ latitude exactly when the least oversight is present. Silence is not consent.
 
 **Minimum viable today.** In your autonomous loop, mark which actions are consequential
 (writes, deletes, external calls, anything outside the task's mandate) and make those require
-an explicit human approval that a timeout *denies* rather than grants.
+an explicit human approval that a timeout *denies* rather than grants. A runnable version is
+in [`starter-kit/authority/`](starter-kit/authority/): it classifies each action, denies the
+consequential ones when nobody answers, and lets the routine work continue.
 
 *Prevents: unreviewed consequential actions under degraded oversight; the model inventing
 authority it was never delegated.*
@@ -296,6 +299,9 @@ the way out.
 **Minimum viable today.** After approval, have the system echo back a structured manifest of
 what it parsed (phases and tasks, by name and count) for a human to confirm, and make it
 refuse rather than guess on anything it cannot parse cleanly.
+[`starter-kit/ingestion/`](starter-kit/ingestion/) does exactly that, and ships a spec with a
+duplicated task id, a task whose criteria were lost, and a section the parser does not know,
+so you can watch all three refuse instead of running short.
 
 *Prevents: executing a silently altered or truncated version of the approved plan; dropped
 tasks discovered late.*
@@ -342,11 +348,14 @@ Corpus    On a pass, a human promotes the decision and its evidence into the dur
           corpus, retrievable months later by a fresh session that never saw this task.
 ```
 
-A runnable reference gate is in [`starter-kit/gates/`](starter-kit/gates/): it validates a
-submitted evidence file plus its artifacts and exits non-zero on any failure. It demonstrates
-the evidence contract and the independent decision point; because it trusts a *submitted*
-artifact, making the evidence unforgeable means having the gate produce it (run the check
-itself), which is the seam a full implementation closes.
+Two runnable gates are in [`starter-kit/gates/`](starter-kit/gates/), and the difference
+between them is the lesson. `gate.py` validates a submitted evidence file plus its artifacts:
+that gives you the evidence contract and the independent decision point, and it is forgeable,
+because an agent that writes the artifact can write a convincing one. The directory ships a
+forged submission that passes it. `gate_produce.py` hands the identical submission a failing
+verdict, because the decisive check is named in the *spec* as a command the gate runs rather
+than in the *evidence* as a path it reads. Same criteria, same submission; what changes is who
+ran the check.
 
 **Anti-pattern.** `human_approved: true` as a model-set boolean. Self-attestation is the #1
 gaming vector: the model certifies its own work. (Hiding the requirements from the model is
@@ -356,7 +365,9 @@ must not control the verifier that checks the evidence.)
 **Minimum viable today.** You don't need a daemon. A pre-commit hook or CI step that runs a
 gate script the model can't run or edit gets you the independent decision point today. For
 evidence the model cannot forge, have that script produce the evidence itself (run the test,
-read a trusted runner's output) rather than trusting a log the agent hands you.
+read a trusted runner's output) rather than trusting a log the agent hands you. Copy
+[`starter-kit/gates/gate_produce.py`](starter-kit/gates/gate_produce.py) and point it at your
+own checks.
 
 *Prevents: Goodhart / spec-gaming, silent self-certification.*
 
@@ -433,9 +444,15 @@ bounded-retry policy) across the whole loop:
 
 - [`starter-kit/spec/spec-template.md`](starter-kit/spec/spec-template.md): a **spec
   skeleton** with checkable, per-task acceptance criteria.
-- [`starter-kit/gates/`](starter-kit/gates/): a zero-dependency, runnable **independent-decision
-  gate** (an evidence validator the agent can't run or self-certify past; it shows the contract
-  and decision point, not anti-forgery), with an example contract and submission.
+- [`starter-kit/gates/`](starter-kit/gates/): two zero-dependency, runnable
+  **independent-decision gates**. `gate.py` validates submitted evidence; `gate_produce.py`
+  runs the check itself. A forged submission passes the first and fails the second, which is
+  the whole argument in two commands.
+- [`starter-kit/ingestion/`](starter-kit/ingestion/): a **plan-ingestion verifier** that prints
+  the manifest it parsed (phases and tasks, by name and count) and refuses on a duplicated task
+  id, missing criteria, or a section it does not recognize, rather than silently running short.
+- [`starter-kit/authority/`](starter-kit/authority/): an **approval a timeout denies**, so
+  degraded oversight narrows a run's authority instead of widening it.
 - [`starter-kit/corpus/`](starter-kit/corpus/): a **deterministic corpus** layout, a
   git-tracked decision record and the standard it produces, the kind you retrieve when
   re-grounding the next task.

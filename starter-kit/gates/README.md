@@ -1,9 +1,15 @@
 # Starter kit: an independent-decision gate
 
-A runnable, zero-dependency reference for the **most important control in the guide**: a
-validation gate whose *verdict* is independent of the generating agent. The agent does the
-work and submits evidence; a separate checker renders the decision after the fact, on the
-content of the artifacts. The agent cannot render the verdict, and a bare "done" cannot pass.
+Two runnable, zero-dependency gates for the **most important control in the guide**. They
+differ on one question, and the difference is the whole lesson:
+
+| | who supplies the decisive evidence | forgeable |
+| --- | --- | --- |
+| `gate.py` | the agent submits it | **yes** |
+| `gate_produce.py` | the gate runs the check itself | no |
+
+Start with `gate.py` to see the evidence contract and the independent decision point. Then
+run the forgery demo below, which breaks it, and see `gate_produce.py` hold.
 
 ## The idea
 
@@ -14,6 +20,11 @@ gate-spec.example.json     ← the checker's copy of the acceptance criteria. Th
 evidence.example.json      ← what the agent submits: claims + pointers to proof artifacts.
 artifacts/test.log         ← a proof artifact.
 gate.py                    ← validates the submission against the criteria, independently.
+
+produce-spec.example.json  ← the same criteria, expressed as checks the GATE RUNS.
+checks/                    ← the held-out check and the code under test.
+forged/                    ← a fabricated submission that satisfies gate.py.
+gate_produce.py            ← runs the check itself; nothing is submitted to forge.
 ```
 
 The agent knows the contract it must meet (bounded retries at 10, no retry on 4xx, a passing
@@ -22,21 +33,6 @@ The agent knows the contract it must meet (bounded retries at 10, no retry on 4x
 
 Public contract, private verifier. The requirement is disclosed; the verdict is not the
 agent's to give.
-
-## What this proves, and what it doesn't
-
-This script demonstrates two real things: the **evidence contract** (submit artifacts, not
-assurances; a bare `"done": true` cannot satisfy an `artifact` requirement) and the
-**independent decision point** (a separate checker renders the verdict, on content, after the
-fact, and the agent cannot self-attest past it).
-
-It does **not**, by itself, prove the evidence is genuine. It checks a `test.log` that the
-agent submits, and an agent that can write that file can forge its contents. So this is not
-tamper-proof. To close that gap, the gate must *produce* the evidence rather than trust it:
-run the held-out test itself, or read output from a runner (CI, a sandbox) the agent cannot
-write to. That boundary is exactly what a full implementation (Socium) supplies, and what a
-do-it-by-hand version has to add deliberately. Treat this script as the contract and the
-decision point, not as complete anti-forgery.
 
 ## Run it
 
@@ -57,24 +53,71 @@ python3 gate.py --spec gate-spec.example.json --evidence /tmp/bad.json --root .
 #   - field 'max_retries' = 99 exceeds max 10
 ```
 
+## The forgery demo
+
+`gate.py` rejects self-attestation but trusts the artifact. `forged/` is what an agent does
+about that: it never fixed the bug in `checks/retry_policy.py`, and it wrote a test log
+saying it did. Every value satisfies the criteria.
+
+```bash
+python3 gate.py --spec gate-spec.example.json --evidence forged/evidence.json
+# GATE PASSED: all required evidence present and validated.
+```
+
+That is the failure the guide warns about, in one command. Now hand the identical forged
+submission to the gate that produces its own evidence:
+
+```bash
+python3 gate_produce.py --spec produce-spec.example.json --evidence forged/evidence.json
+# GATE FAILED:
+#   - produced rule 'retry_policy_checks': exit 1, expected 0
+#   - produced rule 'retry_policy_checks': output missing 'test_no_retry_on_4xx PASSED'
+#   - produced rule 'retry_policy_checks': output contains forbidden 'FAILED'
+```
+
+Nothing about the submission changed. What changed is who ran the check. Add `--show-output`
+to watch the gate generate the evidence it is judging.
+
+To see the honest path, fix the bug the check catches: in `checks/retry_policy.py`, the 4xx
+branch returns `status == 404` where it should return `False`. Correct it and
+`gate_produce.py` passes. The repository deliberately ships with that bug in place so the
+demo works out of the box.
+
+## What each one proves
+
+`gate.py` demonstrates the **evidence contract** (submit artifacts, not assurances; a bare
+`"done": true` cannot satisfy an `artifact` requirement) and the **independent decision
+point** (a separate checker renders the verdict, on content, after the fact, and the agent
+cannot self-attest past it). It is genuinely useful and it is not tamper-proof: an agent that
+can write the artifact can write a convincing one.
+
+`gate_produce.py` closes that seam by moving one thing: the decisive artifact is named in the
+*spec* as a command to run, not in the *evidence* as a path to read. The agent supplies
+nothing that decides the verdict, so there is nothing for it to forge. Values the gate cannot
+produce for itself still come from the agent, under `claimed` rules, and they stay as
+trustworthy as any claim.
+
+The remaining boundary is the runner. `gate_produce.py` executes a subprocess on the same
+machine; a full implementation runs it somewhere the agent cannot write to at all (CI, a
+sandbox, a separate host) and holds back adversarial fixtures the agent never sees.
+
 ## Why this is the control to copy first
 
 - **It rejects self-attestation.** `"done": true` can't satisfy an `artifact` requirement.
   The agent cannot certify its own work.
 - **Its decision is independent.** The agent submits evidence; it does not run the checker or
   supply the verdict. Even knowing every criterion, it cannot pass by restating it.
-- **It marks the seam to harden.** Make the evidence *unforgeable* by having the gate generate
-  it (run the test, read a trusted runner's output), not by trusting a log the agent hands you.
-- **It needs no daemon.** Wire `gate.py` into a pre-commit hook or CI step the agent can't run
-  or edit, and you have the independent decision point today.
+- **It can be made unforgeable without new infrastructure.** `gate_produce.py` is the same
+  idea with the evidence generated rather than trusted, in about a hundred lines.
+- **It needs no daemon.** Wire either script into a pre-commit hook or CI step the agent can't
+  run or edit, and you have the independent decision point today.
 
 ## Wiring it in
 
 1. Put the acceptance criteria in the spec the agent works from: it must know the contract to
    satisfy it. Keep the *checker* and its execution out of the agent's reach (it can't run
-   `gate.py`, edit it, or replace its verdict).
-2. Have the agent emit `evidence.json` + artifacts at the end of a task. For evidence that
-   cannot be forged, have the gate *produce* it (run the check itself, or read a trusted
-   runner's output) rather than trusting an agent-written log.
-3. Run `gate.py` in a pre-commit hook or CI; a non-zero exit blocks the commit/merge.
+   the gate, edit it, or replace its verdict).
+2. Prefer produced evidence. Anything the gate can run for itself, it should run for itself.
+   Reserve submitted evidence for values no check can generate.
+3. Run the gate in a pre-commit hook or CI; a non-zero exit blocks the commit/merge.
 4. On pass, a human promotes the decision + evidence into your corpus (the next control).

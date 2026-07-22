@@ -1,0 +1,5 @@
+{
+  "_comment": "A forged submission. The agent never fixed the 4xx bug; it wrote a test log that says it did. Every value here satisfies gate-spec.example.json.",
+  "test_output": "test.log",
+  "max_retries": 3
+}

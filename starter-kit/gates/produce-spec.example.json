@@ -1,0 +1,18 @@
+{
+  "_comment": "The same acceptance criteria as gate-spec.example.json, expressed as checks the GATE RUNS rather than artifacts the agent submits. 'produced' rules are executed by the verifier; 'claimed' rules cover values it cannot produce for itself.",
+  "produced": [
+    {
+      "name": "retry_policy_checks",
+      "run": ["python3", "checks/run_checks.py"],
+      "must_exit": 0,
+      "must_contain": ["test_no_retry_on_4xx PASSED"],
+      "must_not_contain": ["FAILED", "ERROR"]
+    }
+  ],
+  "claimed": [
+    {
+      "field": "max_retries",
+      "max": 10
+    }
+  ]
+}
