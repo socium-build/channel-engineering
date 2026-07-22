@@ -427,7 +427,8 @@ limit. This is an independent derivation of the claim that reliability is lost a
 and C.\footnote{\href{https://arxiv.org/abs/2511.19550}{`The
 Semiotic Channel Principle: Measuring the Capacity for Meaning in LLM Communication'},
 arXiv:2511.19550, 2025; and a related framework integrating Shannon, Weaver, and formal
-proof systems (arXiv:2604.16471, 2026), which identifies a `semantic bottleneck' arising
+proof systems (\href{https://arxiv.org/abs/2604.16471}{arXiv:2604.16471}, 2026), which
+identifies a `semantic bottleneck' arising
 from vocabulary mismatch that persists even over a noiseless carrier.}
 
 \subsection{The Medium Is Lossy in a Specific, Now-Quantified Way}
@@ -843,24 +844,29 @@ arithmetic sets its cadence.
 
 The history of high-reliability software is a history of engineering discipline closing
 the gap between capability and reliability. The aerospace industry's DO-178C
-standard\footnote{\href{https://www.rtca.org/do-178/}{https://www.rtca.org/do-178/}} did
+standard\footnote{RTCA DO-178C, \emph{Software Considerations in Airborne Systems and Equipment
+Certification}. RTCA, Inc., 2011. \href{https://www.rtca.org/do-178/}{rtca.org/do-178}} did
 not make programmers more capable; it made their capability more reliably usable. The
 medical device industry's IEC
-62304\footnote{\href{https://www.iso.org/standard/38421.html}{https://www.iso.org/standard/38421.html}}
+62304\footnote{IEC 62304, \emph{Medical device software: Software life cycle processes}.
+International Electrotechnical Commission, 2006 (rev.\ 2015).
+\href{https://www.iso.org/standard/38421.html}{iso.org/standard/38421.html}}
 works the same way: it imposes the structural practices that make skill
 reliable in safety-critical contexts.
 
 Bertrand Meyer's Design by
 Contract, formalized in the Eiffel language and documented in \textit{Object-Oriented
 Software
-Construction},\footnote{\href{https://bertrandmeyer.com/OOSC2/}{https://bertrandmeyer.com/OOSC2/}} was
+Construction},\footnote{B.~Meyer, \emph{Object-Oriented Software Construction}, 2nd ed.\ Prentice Hall,
+1997. \href{https://bertrandmeyer.com/OOSC2/}{bertrandmeyer.com/OOSC2}} was
 an answer to the same problem at the level of individual modules: how do you make the
 behavior of a component reliable and verifiable independently of the competence of its
 caller? The answer was to make the contract explicit: to engineer the interface between
 components so that violations were detectable at the boundary.
 
 Daniel Jackson's Alloy and the broader formal methods
-tradition\footnote{\href{https://alloytools.org/book.html}{https://alloytools.org/book.html}}
+tradition\footnote{D.~Jackson, \emph{Software Abstractions: Logic, Language, and Analysis}. MIT
+Press, 2006 (rev.\ 2012). \href{https://alloytools.org/book.html}{alloytools.org/book.html}}
 approached the problem from the other direction: rather than making components more
 robust to incorrect usage, make the specification precise enough that incorrect usage
 becomes visible before implementation. The discipline of writing a formal specification
@@ -868,7 +874,11 @@ forces the engineer to confront the ambiguities and contradictions that will oth
 surface as bugs.
 
 Leslie Lamport's work on distributed
-systems,\footnote{\href{https://lamport.azurewebsites.net/pubs/time-clocks.pdf}{https://lamport.azurewebsites.net/pubs/time-clocks.pdf}} from
+systems,\footnote{L.~Lamport, `Time, Clocks, and the Ordering of Events in a Distributed System,'
+\emph{Communications of the ACM} 21(7):558--565, 1978
+(\href{https://lamport.azurewebsites.net/pubs/time-clocks.pdf}{lamport.azurewebsites.net/pubs/time-clocks.pdf});
+and the TLA+ specification language
+(\href{https://lamport.azurewebsites.net/tla/tla.html}{lamport.azurewebsites.net/tla/tla.html}).} from
 logical clocks to the TLA+ specification language, is perhaps the most directly relevant
 precedent. Lamport's insight was that distributed systems fail in specific, structural
 ways that cannot be addressed by improving individual components. The failure modes are
@@ -1212,7 +1222,9 @@ abandoned because they were too expensive. LLMs make them affordable again.
 restored discipline is a deeper disposition: the recognition that distributed
 systems (and human-AI collaboration is a distributed system) fail in structural ways
 that cannot be addressed by improving individual components. The fallacies of distributed
-computing\footnote{\href{https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing}{https://en.wikipedia.org/wiki/Fallacies\_of\_distributed\_computing}}
+computing\footnote{P.~Deutsch et al., `The Fallacies of Distributed Computing,' Sun Microsystems,
+1994--97.
+\href{https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing}{en.wikipedia.org/wiki/Fallacies\_of\_distributed\_computing}}
 apply to human-AI systems as much as to networked software: the network is not reliable,
 latency is not zero, bandwidth is not infinite, the channel is not secure.
 
@@ -1264,9 +1276,9 @@ different kinds of intelligence, joined by a shared substrate of accumulated wor
 
 The model has three components. The first is the two participants: the human, who brings
 judgment, direction, and domain expertise; and the AI, who brings production capacity, pattern
-recognition, and broad knowledge. The second is the channel: the context window,
-the retrieval layer, the prompt construction, and the validation gates, which together
-form the engineered information environment that makes the partnership productive. The
+recognition, and broad knowledge. The second is the channel: the context window
+as medium, the retrieval layer, the prompt construction, and the validation gates, which
+together form the engineered information environment that makes the partnership productive. The
 third is the corpus: the accumulated artifacts of the work (specifications, code, tests,
 decisions, audit trails) that constitute the partnership's durable memory.
 
