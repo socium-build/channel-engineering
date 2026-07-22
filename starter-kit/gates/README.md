@@ -27,6 +27,12 @@ forged/                    ← a fabricated submission that satisfies gate.py.
 gate_produce.py            ← runs the check itself; nothing is submitted to forge.
 ```
 
+> **`gate_produce.py` fails on purpose until you fix a bug.** `checks/retry_policy.py`
+> ships with a deliberate defect so the forgery demo below works out of the box, which
+> means *every* run of the producing gate reports `GATE FAILED` until you correct it.
+> That is the demo working, not the gate being broken. The fix is one line, and it is
+> named at the end of the forgery demo.
+
 The agent knows the contract it must meet (bounded retries at 10, no retry on 4xx, a passing
 `no_retry_on_4xx` test), because it cannot build the right thing otherwise. What it does
 **not** get is the power to run the checker, edit it, or pass it by asserting success.

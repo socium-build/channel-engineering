@@ -72,7 +72,7 @@ Two stances hold across all three phases:
 | **L1: Curated context** | You pack the window well, but from inside a loop you don't own. | Put a *spec* in front of generation. |
 | **L2: Specs + advisory checks** | You write specs; tests exist but are advisory or self-attested (gameable). | Make the gate **independent and tamper-resistant**; make memory **deterministic**. |
 | **L3: Gated + durable** | Independent gates (the agent can't run them or self-certify past them); validated work persists extractively. | Own the loop end to end; re-ground every step. |
-| **L4: Owned & re-grounded** | You control assembly/retention; re-ground at each step; reliability compounds. | None; this is the target. |
+| **L4: Owned & re-grounded** | You control assembly/retention; re-ground at each step; reliability compounds. | None for the controls in this guide. The honest open problem is retrieval by *causal relevance* (which prior decisions constrain this one) rather than surface similarity; the paper names it in §7 and leaves it unsolved. |
 
 You don't need L4 to benefit. Most teams are at L0–L1 and the jump to L2 is the highest-ROI
 move available. Each control below tells you which rung it buys.
