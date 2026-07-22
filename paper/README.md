@@ -72,7 +72,7 @@ cross-references, and then syncs the resulting PDF to:
   repo is checked out as a sibling under `…/socium-build/website` (otherwise it
   skips that copy).
 
-Output: 35 pages (numbered sections; position paper + research agenda framing).
+Output: 36 pages (numbered sections; position paper + research agenda framing).
 
 ### The web renders
 
