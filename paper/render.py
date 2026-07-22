@@ -376,8 +376,9 @@ def note_md(latex):
     urls = []
     txt = conv(latex, "plain", urls).strip()
     txt = re.sub(r"\s+", " ", txt)
-    if urls:
-        txt = txt + " " + " ".join(urls)
+    extra = [u for u in urls if u not in txt]
+    if extra:
+        txt = txt + " " + " ".join(extra)
     return txt
 
 
@@ -397,7 +398,7 @@ def sub_footnote_markers(text, mode):
 
 # ---- markdown emission ---------------------------------------------------------
 
-def emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, author):
+def emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, refs, author):
     cur_llms = read(LLMS)
     header = cur_llms[:cur_llms.index("## Abstract")]
     footer = cur_llms[cur_llms.rindex("---"):]
@@ -426,7 +427,10 @@ def emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, author):
             if t == SENT + "TRACE" + SENT:
                 parts.append(trace_block)
             elif mp:
-                parts.append("> " + conv(pullquotes[int(mp.group(1))], "md").strip())
+                q = conv(pullquotes[int(mp.group(1))], "md").strip()
+                # Every line needs the marker: a bare continuation line ends the
+                # blockquote and splits the sentence into a second paragraph.
+                parts.append("\n".join("> " + ln.strip() for ln in q.splitlines()))
             elif mt:
                 parts.append("TEST: " + conv(tests[int(mt.group(1))], "md").strip())
             elif mg:
@@ -441,6 +445,14 @@ def emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, author):
     for idx, fn in enumerate(footnotes):
         notes.append("%d. %s" % (idx + 1, note_md(fn)))
     out.append("\n".join(notes))
+
+    references = ["## References", ""]
+    for idx, (citation, url, disp) in enumerate(refs):
+        line = "%d. %s" % (idx + 1, re.sub(r"\s+", " ", conv(citation, "md").strip()))
+        if url and url not in line:
+            line = line + " " + url
+        references.append(line)
+    out.append("\n".join(references))
 
     out.append("## About the Author\n\n" + conv(author, "md").strip())
     out.append(footer.rstrip("\n") + "\n")
@@ -562,10 +574,52 @@ def emit_astro(blocks, footnotes, pullquotes, tests, fig_caption, refs, author):
     return prefix + middle + suffix
 
 
+# ---- parity check ---------------------------------------------------------------
+
+def verify_parity(md, astro, footnotes, refs):
+    """Both renders come from one source, and nothing was checking they agreed.
+
+    That is how 54 references went missing from llms-full.txt while the HTML had
+    them all, in a file the site advertises as carrying "notes and references".
+    Counts and headings only: comparing prose across two markup languages is a
+    normalizer rabbit hole, and a count mismatch is what the real failure looks
+    like anyway.
+    """
+    problems = []
+
+    md_secs = re.findall(r"^##\s+(\d+\s.+)$", md, re.M)
+    ht_secs = [re.sub(r"<[^>]+>", "", m) for m in
+               re.findall(r"<h2><span class=\"secnum\">(.*?)</h2>", astro, re.S)]
+    if len(md_secs) != len(ht_secs):
+        problems.append("sections: md=%d html=%d" % (len(md_secs), len(ht_secs)))
+    else:
+        for a, b in zip(md_secs, ht_secs):
+            if re.sub(r"\s+", " ", a).strip() != re.sub(r"\s+", " ", b).strip():
+                problems.append("section title differs: %r vs %r" % (a, b))
+
+    pairs = [
+        ("footnotes", len(re.findall(r"<li id=\"fn-\d+\">", astro)), len(footnotes)),
+        ("references", len(re.findall(r"^\d+\.\s", md[md.find("## References"):
+                                                     md.find("## About the Author")], re.M)),
+         len(refs)),
+        ("pullquotes", len(re.findall(r"<blockquote class=\"pull-quote\">", astro)),
+         len(re.findall(r"(?:^>.*\n?)+", md, re.M))),
+    ]
+    for name, a, b in pairs:
+        if a != b:
+            problems.append("%s: html/source=%d md=%d" % (name, a, b))
+
+    md_notes = len(re.findall(r"^\d+\.\s", md[md.find("## Notes"):md.find("## References")], re.M))
+    if md_notes != len(footnotes):
+        problems.append("notes in md=%d, source footnotes=%d" % (md_notes, len(footnotes)))
+
+    return problems
+
+
 def main():
     blocks, footnotes, pullquotes, tests, fig_caption, refs, author = build()
 
-    llms_out = emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, author)
+    llms_out = emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, refs, author)
     astro_out = emit_astro(blocks, footnotes, pullquotes, tests, fig_caption, refs, author)
 
     promote = "--write" in sys.argv
@@ -578,8 +632,17 @@ def main():
         f.write(astro_out)
 
     print("wrote %s (%d footnotes, %d refs)" % (llms_path, len(footnotes), len(refs)))
+
+    problems = verify_parity(llms_out, astro_out, footnotes, refs)
+    if problems:
+        print("PARITY CHECK FAILED: the two renders disagree", file=sys.stderr)
+        for msg in problems:
+            print("  - %s" % msg, file=sys.stderr)
+        return 1
     print("wrote %s" % astro_path)
+    print("parity ok: sections, notes, references, and pull quotes match across renders")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main() or 0)
