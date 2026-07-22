@@ -336,6 +336,11 @@ def build_blocks(pre):
             seccount[0] += 1
             blocks.append(("h2", seccount[0], m.group(1)))
             continue
+        m = re.match(r"\\section\*\{(.*)\}\s*$", s)
+        if m:
+            flush()
+            blocks.append(("h2u", m.group(1)))  # unnumbered back-matter heading
+            continue
         m = re.match(r"\\subsection\*?\{(.*)\}\s*$", s)
         if m:
             flush()
@@ -367,7 +372,12 @@ def parse_references(region):
 def parse_author(region):
     region = region.split("\\section*{About the Author}", 1)[1]
     region = region.replace("\\noindent", " ")
-    return " ".join(x.strip() for x in region.strip().split("\n")).strip()
+    # Drop spacing commands with their braced argument (e.g. \\vspace{0.9em}),
+    # which double as the paragraph separators in this section.
+    region = re.sub(r"\\vspace\*?\{[^{}]*\}", "\n\n", region)
+    # Preserve paragraph breaks; flatten only the wrapping inside each paragraph.
+    paras = [" ".join(x.split()) for x in re.split(r"\n\s*\n", region) if x.strip()]
+    return "\n\n".join(paras).strip()
 
 
 # ---- footnote / Notes rendering ------------------------------------------------
@@ -417,6 +427,8 @@ def emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, refs, author):
             parts.append("## Abstract")
         elif k == "h2":
             parts.append("## %d %s" % (blk[1], conv(blk[2], "md").strip()))
+        elif k == "h2u":
+            parts.append("## %s" % conv(blk[1], "md").strip())
         elif k == "h3":
             parts.append("### " + conv(blk[1], "md").strip())
         elif k == "p":
@@ -517,6 +529,12 @@ def emit_astro(blocks, footnotes, pullquotes, tests, fig_caption, refs, author):
             body.append('      <section id="%s" class="paper-section">' % slug)
             body.append('        <h2><span class="secnum">%d</span> %s</h2>'
                         % (blk[1], conv(blk[2], "html").strip()))
+            open_section = True
+        elif k == "h2u":
+            close()
+            slug = re.sub(r"[^a-z0-9]+", "-", blk[1].lower()).strip("-")
+            body.append('      <section id="%s" class="paper-section">' % slug)
+            body.append("        <h2>%s</h2>" % conv(blk[1], "html").strip())
             open_section = True
         elif k == "h3":
             body.append("        <h3>%s</h3>" % conv(blk[1], "html").strip())
