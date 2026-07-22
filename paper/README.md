@@ -11,6 +11,7 @@ Josh Paul · Socium · July 2026
 paper/
 ├── build.sh                  ← One-command build + PDF sync (see below)
 ├── main.tex                  ← Full LaTeX source (XeLaTeX)
+├── render.py                 ← Derives the website's two renders from main.tex
 ├── socium_logo.png           ← Socium logo (300 dpi PNG, used on cover page)
 ├── fonts/
 │   ├── SourceSerif4-VF.ttf   ← Source Serif 4 variable font (roman, body)
@@ -37,12 +38,11 @@ The committed, published PDF lives one level up at
 > bundle fully self-contained and the figure typography matched to the
 > document fonts.
 
-> **In-text exhibits:** §10 includes a worked-example callout ("A Single Task,
-> Traced") built with an `mdframed` box, and each of the nine Practical Principles
-> (§11) carries a one-line operational `TEST` rendered by the `\principletest` macro
-> (defined near the pull-quote macro in the preamble). Both rely only on the
-> already-loaded `mdframed` package and the default monospace font, with no new
-> dependencies.
+> **In-text exhibits:** each of the seven commitments in §4 (Beyond Context
+> Engineering) carries a one-line operational `TEST`, rendered by the
+> `\principletest` macro defined near the pull-quote macro in the preamble. It
+> relies only on the already-loaded `mdframed` package and the default monospace
+> font, with no new dependencies.
 
 ---
 
@@ -62,9 +62,10 @@ The committed, published PDF lives one level up at
 ```
 
 `build.sh` is location-independent: it `cd`s to its own directory (so the
-relative `fonts/` paths resolve no matter where you invoke it), auto-discovers
-`xelatex` if it isn't already on `PATH` (TinyTeX, TeX Live, MacTeX, Homebrew),
-runs two passes for cross-references, and then syncs the resulting PDF to:
+relative `fonts/` paths resolve no matter where you invoke it), runs `render.py`
+to regenerate the web renders, auto-discovers `xelatex` if it isn't already on
+`PATH` (TinyTeX, TeX Live, MacTeX, Homebrew), runs two passes for
+cross-references, and then syncs the resulting PDF to:
 
 - `../docs/engineering-the-channel.pdf` (the committed, published copy), and
 - `../../website/public/engineering-the-channel.pdf` **if** the marketing-site
@@ -72,6 +73,27 @@ runs two passes for cross-references, and then syncs the resulting PDF to:
   skips that copy).
 
 Output: 35 pages (numbered sections; position paper + research agenda framing).
+
+### The web renders
+
+`main.tex` is the single source for three surfaces: this PDF, the site's HTML
+page, and its plain-text file for machine ingestion. `render.py --write` derives
+the latter two into the sibling `website` repo:
+
+- `../../website/public/llms-full.txt` (markdown, for machine ingestion)
+- `../../website/src/pages/paper.astro` (the HTML page)
+
+Hand-authored regions of `paper.astro` are lifted and preserved: the page head
+and metadata, the four SVG figures, and the closing download and footer blocks.
+Edit those in place and they survive regeneration. Everything between them is
+generated, so do not edit it; edit `main.tex` and rebuild.
+
+After writing, `render.py` **verifies the two renders agree** and exits non-zero
+if they do not, comparing section count and titles, footnote count, reference
+count, and pull-quote count. `build.sh` stops on that failure. The check exists
+because the markdown emitter silently dropped all 54 references once, and one
+source with two emitters and nothing comparing the outputs is how that survives
+every build.
 
 ### Build (manual)
 
