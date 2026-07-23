@@ -354,6 +354,12 @@ def build_blocks(pre):
 def parse_references(region):
     region = region.split("\\section*{References}", 1)[1]
     refs = []
+    # Text before the first entry (an \\textit{...} note) is otherwise dropped;
+    # carry it as a sentinel so both renders show it, not just the PDF.
+    head_region = region.split("\\noindent\\textbf{", 1)[0]
+    lead = re.search(r"\\textit\{([^{}]*)\}", head_region)
+    if lead:
+        refs.append(("__LEAD__", re.sub(r"\s+", " ", lead.group(1)).strip(), None))
     for chunk in region.split("\\noindent\\textbf{")[1:]:
         cite_part = chunk.split("\\\\*", 1)
         head = cite_part[0]
@@ -459,8 +465,14 @@ def emit_llms(blocks, footnotes, pullquotes, tests, fig_caption, refs, author):
     out.append("\n".join(notes))
 
     references = ["## References", ""]
-    for idx, (citation, url, disp) in enumerate(refs):
-        line = "%d. %s" % (idx + 1, re.sub(r"\s+", " ", conv(citation, "md").strip()))
+    n = 0
+    for citation, url, disp in refs:
+        if citation == "__LEAD__":
+            references.append("*%s*" % conv(url, "md").strip())
+            references.append("")
+            continue
+        n += 1
+        line = "%d. %s" % (n, re.sub(r"\s+", " ", conv(citation, "md").strip()))
         if url and url not in line:
             line = line + " " + url
         references.append(line)
@@ -568,9 +580,15 @@ def emit_astro(blocks, footnotes, pullquotes, tests, fig_caption, refs, author):
     notes.append("      </section>")
 
     # ---- References ----
+    ref_lead = next((u for c, u, _ in refs if c == "__LEAD__"), None)
     references = ['      <section id="references" class="paper-section">',
-                  '        <h2>References</h2>', '        <ol class="refs">']
+                  '        <h2>References</h2>']
+    if ref_lead:
+        references.append('        <p class="refs-note">%s</p>' % conv(ref_lead, "html").strip())
+    references.append('        <ol class="refs">')
     for citation, url, disp in refs:
+        if citation == "__LEAD__":
+            continue
         cite_html = conv(citation, "html").strip().rstrip()
         if url:
             references.append("          <li>%s<br /><a href=\"%s\">%s</a></li>"
@@ -619,7 +637,7 @@ def verify_parity(md, astro, footnotes, refs):
         ("footnotes", len(re.findall(r"<li id=\"fn-\d+\">", astro)), len(footnotes)),
         ("references", len(re.findall(r"^\d+\.\s", md[md.find("## References"):
                                                      md.find("## About the Author")], re.M)),
-         len(refs)),
+         len([r for r in refs if r[0] != "__LEAD__"])),
         ("pullquotes", len(re.findall(r"<blockquote class=\"pull-quote\">", astro)),
          len(re.findall(r"(?:^>.*\n?)+", md, re.M))),
     ]
@@ -649,7 +667,7 @@ def main():
     with open(astro_path, "w", encoding="utf-8") as f:
         f.write(astro_out)
 
-    print("wrote %s (%d footnotes, %d refs)" % (llms_path, len(footnotes), len(refs)))
+    print("wrote %s (%d footnotes, %d refs)" % (llms_path, len(footnotes), len([r for r in refs if r[0] != "__LEAD__"])))
 
     problems = verify_parity(llms_out, astro_out, footnotes, refs)
     if problems:
